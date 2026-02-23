@@ -12,7 +12,7 @@ DMXRouter is a high-performance, cross-platform application written in C++ with 
 - **Internal routing** — cascade process engines for multi-stage merge topologies without physical loopback
 - **Universe merge engine** — 8 merge modes including HTP, LTP, Backup, X-Fade, Switch, and Custom per-channel policy
 - **Show cue recording & playback** — capture, sequence, and automate DMX shows with crossfade transitions and DMX remote triggering
-- **RDM device management** — full E1.20 with device discovery, parameter control, and sensor monitoring
+- **RDM device management** — full E1.20 with device discovery, parameter control, sensor monitoring, fixture templates, and operating hours tracking
 - **RDMNet / LLRP** — E1.33 broker connection and LLRP device discovery
 - **Channel-level patching** — per-channel remap, scale (0–200%), min/max limits, CSV import/export
 - **Network discovery** — live Art-Net node and sACN source discovery with remote node configuration
@@ -56,7 +56,7 @@ DMXRouter runs on a **single-threaded event-loop architecture** driven by Qt's e
 │  sACN RX/TX)  │  512 routes) │  playback)   │  sACN scan) │
 ├───────────────┼──────────────┼──────────────┼─────────────┤
 │ RDMManager    │ RDMNetManager│ PatchManager │ StatsEngine │
-│ (E1.20 RDM)   │ (E1.33/LLRP) │ (ch remap)   │ (metrics)   │
+│ (E1.20 RDM)  │ (E1.33/LLRP) │ (ch remap)   │ (metrics)   │
 ├───────────────┴──────────────┴──────────────┴─────────────┤
 │              Qt6 GUI (MainWindow + Widgets)               │
 └───────────────────────────────────────────────────────────┘
@@ -172,15 +172,32 @@ DMXRouter includes a complete show programming and playback engine for automated
 - Discover devices on any Art-Net universe (ArtRdm packets)
 - Identify, set DMX start address, device label, and personality
 - Read 19+ PIDs: device info, manufacturer, model, personality list, DMX address, identify state, sensor definitions and values, lamp state, lamp on mode, product detail, supported parameters, and more
+- PID Browser for raw GET/SET of any standard or manufacturer-specific parameter
 - 3-second transaction timeout with automatic retry
+- Sequential PID chaining to avoid saturating gateways with small RDM buffers
 - Full device cache with parameter persistence
 - Interactive device tree in the **🎛 RDM** tab, sorted by DMX start address with device counts per port, DMX address ranges, and last-seen timestamps with stale-device highlighting
+- RDM is **off by default** — toggle on via toolbar to avoid unintended bus traffic during live shows
+
+### Fixture Templates
+- Save a device's configuration (DMX address, personality, label, and parameters) as a reusable template keyed by manufacturer and model ID
+- **Auto-apply on discovery** — newly discovered devices matching a saved manufacturer/model pair receive their template configuration automatically, enabling hands-free commissioning of replacement fixtures
+- Templates stored as JSON and persist between sessions
+- Manual apply available for selective deployment from the Templates tab
+
+### Fixture Database
+- Track operating hours, lamp hours, and power cycles for every RDM device in the installation
+- Timestamped snapshots build a usage history per fixture for maintenance planning
+- CSV export for integration with external asset management and maintenance scheduling tools
+- Database cleanup to clear fixtures from previous sessions or venues
+- Configurable minimum interval between snapshots to prevent redundant recordings
 
 ### RDMNet — ANSI E1.33 / LLRP
 - **LLRP discovery** — multicast probe on 239.255.250.133 and 239.255.250.134 with known-UID suppression
 - **RDM over LLRP** — send RDM commands to LLRP targets without an Art-Net path
 - **Broker connection** — TCP with full Client Connect handshake, 15-second heartbeat, Client Fetch List, RPT Request/Notification/Status, and broker redirect (IPv4 and IPv6)
-- Self-filtering by CID prevents echo responses
+- CID-based packet filtering prevents processing responses intended for other controllers on the same network
+- Corrupt TCP stream detection with immediate disconnect on invalid ACN headers
 - Dedicated **🌐 RDMNet** tab with LLRP target list, broker controls, and client roster
 
 ---
@@ -328,6 +345,8 @@ Example configuration excerpt:
 
 **Large LED installation** — use sACN Universe Synchronization to ensure all universes are released simultaneously at receiver endpoints, eliminating visible tearing across a multi-universe LED wall.
 
+**Fixture fleet management** — use RDM fixture templates to pre-configure replacement fixtures automatically on discovery, and track operating hours across the entire installation for proactive lamp and LED driver maintenance scheduling.
+
 ---
 
 ## License
@@ -340,4 +359,4 @@ This application uses **Qt 6**, licensed under the LGPL v3. Qt is dynamically li
 
 ---
 
-*DMXRouter v1.1.0 — Built for the stage.*
+*DMXRouter v1.2.0 — Built for the stage.*
