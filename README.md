@@ -22,7 +22,7 @@ DMXRouter is a high-performance, cross-platform application written in C++ with 
 - **Universe monitor** — real-time DMX data viewer with per-interface filtering for multi-NIC environments
 - **Profile manager** — save and recall complete configurations, with optional startup profile auto-load
 - **Update checker** — automatic new version detection via GitHub Releases
-- **Cross-platform** — Windows, Linux and macOS from a single codebase
+- **Cross-platform** — Windows, Linux (x86-64 and ARM64), and macOS from a single codebase
 - **~35,500 lines of production C++** — zero compiler warnings with strict flags (`-Wall -Wextra -Wpedantic`)
 
 ---
@@ -372,10 +372,14 @@ Example configuration excerpt:
 Download and run `DMXRouter-Setup.exe`. All dependencies are included.
 
 ### Linux
-Download the `DMXRouter` binary from the [Releases](https://github.com/fiverecords/DMXRouter/releases) page. Qt6 runtime libraries are required:
+Download the binary for your architecture from the [Releases](https://github.com/fiverecords/DMXRouter/releases) page:
+- `DMXRouter-v1.3.0-linux-x86_64.zip` — standard PCs and servers
+- `DMXRouter-v1.3.0-linux-arm64.zip` — Raspberry Pi 4/5, Orange Pi, and other ARM64 boards
+
+Qt6 runtime libraries are required:
 
 ```bash
-# Ubuntu / Debian
+# Ubuntu / Debian / Raspberry Pi OS
 sudo apt install libqt6core6 libqt6gui6 libqt6widgets6 libqt6network6
 
 # Fedora
