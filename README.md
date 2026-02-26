@@ -115,7 +115,7 @@ The output of one process engine can be fed as the input to another, enabling ca
 - **Engine-to-engine selection** — the merge editor lists all available engines with their output targets; selecting one automatically links the routing
 - **Per-engine sender keys** — each engine's internal output uses a unique cache key, preventing collisions when multiple engines share the same output universe
 - **Keep-alive propagation** — when a source drops, the upstream engine's keep-alive data continues to feed downstream engines, preventing cascading failures through the routing chain
-- **Failsafe hold propagation** — hold-last-state behaviour propagates correctly through internal routing chains
+- **Failsafe hold propagation** — hold-last-state behaviour propagates correctly through internal routing chains, including Full and Scene failsafe modes which are now forwarded to downstream engines immediately
 - **Physical loopback** — for same-interface routing scenarios where the "OWN" checkbox is enabled, data is injected directly without requiring an external network path
 - **Recursion guard** — maximum depth of 4 prevents infinite loops in circular topologies
 
@@ -186,6 +186,7 @@ DMXRouter includes a complete show programming and playback engine for automated
 ### RDM — ANSI E1.20
 - Discover devices on any Art-Net universe (ArtRdm packets)
 - Identify, set DMX start address, device label, and personality
+- **Identify management** — visual 💡 indicator and amber highlight in the device tree on identify, dedicated Identify Off button in the Config tab, right-click context menu (Identify On / Off), and an **All Identify Off** panic button in the header bar that sends Identify Off to every discovered fixture
 - Read 19+ PIDs: device info, manufacturer, model, personality list, DMX address, identify state, sensor definitions and values, lamp state, lamp on mode, product detail, supported parameters, and more
 - PID Browser for raw GET/SET of any standard or manufacturer-specific parameter
 - 3-second transaction timeout with automatic retry (up to 2 retries per transaction)
@@ -259,7 +260,7 @@ The **🔍 Discovery** tab shows all Art-Net nodes and sACN sources visible on t
 
 **Art-Net nodes:** short name, long name, firmware version, IP, port count, active universes. Remote configuration via ArtAddress and ArtIpProg directly from the UI. Dynamic port controls adapt to the actual port count reported by each node, with per-port universe display, merge mode, direction, RDM enable, output style, and protocol selection. Art-Net universes show absolute universe numbers alongside the standard Net.Subnet.Universe notation. Nodes removed 60 seconds after last reply.
 
-**Protocol-aware port configuration** — switching a port between Art-Net and sACN adapts the addressing UI automatically: sACN hides Net/Subnet and expands Universe to 1–63999, Art-Net shows the traditional Net / Subnet / Universe fields. Switching converts the address — no manual recalculation needed.
+**Protocol-aware port configuration** — switching a port between Art-Net and sACN adapts the addressing UI automatically: sACN hides Net/Subnet and expands Universe to 1–32,767, Art-Net shows the traditional Net / Subnet / Universe fields with a fully editable Absolute column that auto-syncs with the individual address fields. Switching preserves the displayed universe number — no manual recalculation needed.
 
 **sACN sources:** source name, CID, IP, universe list. Sources removed 15 seconds after last packet.
 
@@ -336,8 +337,8 @@ All 9 panels (Interfaces, Engines, Monitor, Cues, Stats, Discovery, RDM, Broker,
 The interface looks identical on Windows, macOS, and Linux — same font (Inter), same colors, same spacing. Platform-specific adaptations happen under the hood:
 
 - **Windows** — FreeType font engine eliminates the colored ClearType fringing on dark backgrounds
-- **macOS** — stylesheet font sizes scaled for Retina displays; native file dialogs restored for Sequoia compatibility; App Nap disabled so DMX output stays active when the window loses focus
-- **Linux** — consistent Fusion style with bundled Inter font
+- **macOS** — stylesheet font sizes scaled for Retina displays; native file dialogs restored for Sequoia compatibility; App Nap disabled so DMX output stays active when the window loses focus; correct system monospace font (Menlo) used in all technical readouts
+- **Linux** — consistent Fusion style with bundled Inter font; system monospace font (DejaVu Sans Mono) for technical readouts
 
 ---
 
@@ -409,8 +410,8 @@ Download and run `DMXRouter-Setup.exe`. All dependencies are included.
 
 ### Linux
 Download the binary for your architecture from the [Releases](https://github.com/fiverecords/DMXRouter/releases) page:
-- `DMXRouter-v1.4.0-linux-x86_64.zip` — standard PCs and servers
-- `DMXRouter-v1.4.0-linux-arm64.zip` — Raspberry Pi 4/5, Orange Pi, and other ARM64 boards
+- `DMXRouter-v1.4.1-linux-amd64.tar.gz` — standard PCs and servers
+- `DMXRouter-v1.4.1-linux-arm64.tar.gz` — Raspberry Pi 4/5, Orange Pi, and other ARM64 boards
 
 Qt6 runtime libraries are required:
 
@@ -448,4 +449,4 @@ This application uses **Qt 6**, licensed under the LGPL v3. Qt is dynamically li
 
 ---
 
-*DMXRouter v1.4.0 — Built for the stage.*
+*DMXRouter v1.4.1 — Built for the stage.*
