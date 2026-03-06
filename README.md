@@ -12,9 +12,10 @@ DMXRouter is a high-performance, cross-platform application written in C++ with 
 - **Internal routing** — cascade process engines for multi-stage merge topologies without physical loopback
 - **Universe merge engine** — 8 merge modes including HTP, LTP, Backup, X-Fade, Switch, and Custom per-channel policy
 - **sACN per-channel priority** — full E1.31 0xDD support in merge and monitoring, with color-coded priority visualization
-- **Dockable panels** — all 9 panels detach into floating windows for multi-monitor setups; drag, double-click, or use Alt+1–9
-- **Show cue recording & playback** — capture, sequence, and automate DMX shows with crossfade transitions and DMX remote triggering
+- **Dockable panels** — all panels detach into floating windows for multi-monitor setups; drag, double-click, or use Alt+1–9
+- **Show cue system** — snapshot and sequence recording, crossfade with selectable curves, autopilot auto-advance, loop/ping-pong playback, and DMX remote triggering
 - **RDM device management** — full E1.20 with device discovery, parameter control, sensor monitoring, fixture templates, operating hours tracking, and large installation support (100+ fixtures)
+- **RDM device emulator** — capture a real fixture's RDM profile and impersonate it on the network for pre-programming, controller testing, or equipment replacement
 - **RDMNet / LLRP** — E1.33 broker connection and LLRP device discovery
 - **Channel-level patching** — per-channel remap, scale (0–200%), min/max limits, CSV import/export
 - **Channel history** — oscilloscope-style real-time waveform display for any DMX channel
@@ -22,10 +23,11 @@ DMXRouter is a high-performance, cross-platform application written in C++ with 
 - **VLAN management** — cross-platform virtual adapter management for production network segmentation (Windows Hyper-V, Linux ip/8021q, macOS ifconfig)
 - **Real-time statistics** — per-interface and per-universe throughput metrics with live event log and pop-out log window
 - **Universe monitor** — real-time DMX data and sACN priority viewer with per-interface filtering for multi-NIC environments
+- **Bulk workflow tools** — Reroute (swap interfaces across multiple engines at once), Rename with auto-increment, Absolute universe addressing across all panels
 - **Profile manager** — save and recall complete configurations, with optional startup profile auto-load
-- **Update checker** — automatic new version detection via GitHub Releases
+- **Update checker** — automatic new version detection via GitHub Releases, with persistent status bar button and per-version dismiss
 - **Cross-platform** — identical look and feel on Windows, Linux (x86-64 and ARM64), and macOS from a single codebase
-- **~37,000 lines of production C++17** — zero compiler warnings with strict flags (`-Wall -Wextra -Wpedantic` / `/W4`)
+- **~42,000 lines of production C++17** — zero compiler warnings with strict flags (`-Wall -Wextra -Wpedantic` / `/W4`)
 
 ---
 
@@ -37,6 +39,7 @@ DMXRouter is a high-performance, cross-platform application written in C++ with 
 - [Merge Engine](#merge-engine)
 - [Show Cue System](#show-cue-system)
 - [RDM & RDMNet](#rdm--rdmnet)
+- [RDM Device Emulator](#rdm-device-emulator)
 - [Channel Patching](#channel-patching)
 - [Channel History](#channel-history)
 - [Network Discovery](#network-discovery)
@@ -63,8 +66,8 @@ DMXRouter runs on a **single-threaded event-loop architecture** driven by Qt's e
 │ (Art-Net /    │ (8 modes,    │ (cue record/ │ (Art-Net /  │
 │  sACN RX/TX)  │  512 routes) │  playback)   │  sACN scan) │
 ├───────────────┼──────────────┼──────────────┼─────────────┤
-│ RDMManager    │ RDMNetManager│ PatchManager │ StatsEngine │
-│ (E1.20 RDM)   │ (E1.33/LLRP) │ (ch remap)   │ (metrics)   │
+│ RDMManager    │ RDMNetManager│ PatchManager │ RdmEmulator │
+│ (E1.20 RDM)   │ (E1.33/LLRP) │ (ch remap)   │ (virtual fx)│
 ├───────────────┴──────────────┴──────────────┴─────────────┤
 │              Qt6 GUI (MainWindow + Widgets)               │
 └───────────────────────────────────────────────────────────┘
@@ -153,28 +156,64 @@ Each merge engine accepts **up to 4 inputs** and produces one merged output. Up 
 
 ## Show Cue System
 
-DMXRouter includes a complete show programming and playback engine for automated lighting control.
+DMXRouter includes a complete show programming and playback engine for automated lighting control, supporting both instantaneous snapshots and time-based sequence recordings.
 
-### Recording
-- Capture a snapshot of the live merged DMX output across all active process engines as a numbered cue
-- Up to **40 shows**, each with an unlimited cue list
+### Cue Types
+
+**Snapshot** — captures the live merged DMX output across all active process engines as a single static frame. The classic cue type for theatrical and event lighting.
+
+**Sequence** — records live DMX data over time at 40 fps (25 ms intervals, matching DMX refresh rate). Click ⏺ SEQ to start recording while DMX is flowing, click again to stop. The result is a timeline cue that plays back the captured movement exactly as it happened — similar to a standalone DMX recorder, but integrated into the show system.
+
+### Shows and Cue Management
+
+- Up to **40 shows**, each with up to 999 cues
 - Each cue stores per-engine DMX state (512 channels × engine count)
-- Cues carry individual fade times and user labels
+- Cues carry individual fade times, user labels, and recording timestamps
+- **Copy** — copy selected cues within the same show or to a different one
+- **Reorder** — move cues up or down in the list
 
 ### Playback
+
 - **Go** — advance to the next cue with a smooth crossfade
-- **Jump** — go to any cue by index instantly
+- **Jump** — go to any cue by index
 - **Back / Forward** — pre-select the next cue without triggering
-- **Pause / Resume** — pause mid-crossfade; the fade resumes from exactly where it was stopped
-- **Stop** — halt playback immediately and inject a blackout
+- **Pause / Resume** — pause mid-crossfade or mid-sequence; resumes from exactly where it stopped
+- **Stop** — halt playback and inject a blackout
 - **Hold timer** — configurable auto-advance delay before the next cue fires
 
 ### Crossfade Engine
+
 - 40 Hz update rate (25 ms tick) for smooth transitions
-- Linear interpolation across all 512 channels of every active engine
+- Per-channel interpolation across all 512 channels of every active engine
 - Flash-free cue jumps after a Stop state (skips the crossfade to prevent ghost-frame artifacts)
+- When a crossfade starts from a playing sequence, DMXRouter snapshots the current frame and uses it as the fade source — no visual glitch from rewinding
+
+### Fade Curves
+
+Every cue has a selectable curve that shapes how the crossfade progresses:
+
+| Curve | Behaviour |
+|-------|-----------|
+| **Linear** | Constant rate (default) |
+| **S-Curve** | Smooth acceleration and deceleration (3t²−2t³) |
+| **Ease In** | Starts slow, finishes fast |
+| **Ease Out** | Starts fast, finishes slow |
+| **Snap** | Instant jump at the midpoint of the fade time |
+
+### Sequence Playback Modes
+
+Each sequence cue has a Loop setting:
+
+- **Once** — plays through the timeline once, then holds the last frame
+- **Loop** — restarts from the beginning when it reaches the end
+- **Ping-Pong** — reverses direction at each end, creating a back-and-forth effect
+
+### Autopilot
+
+When autopilot is enabled (✈ Auto), the engine automatically advances to the next cue after the current one finishes playing (including any hold time). Sequence cues respect the **Reps** column — the sequence plays the specified number of complete cycles before advancing. Playback stops at the end of the cue list.
 
 ### DMX Remote Control
+
 - Any DMX channel on any universe can trigger record, play, stop, and cue selection from a lighting desk
 - Arm / disarm prevents accidental triggers on startup
 - Gap guard prevents cue flooding from noisy DMX faders
@@ -222,6 +261,37 @@ DMXRouter includes a complete show programming and playback engine for automated
 - CID-based packet filtering prevents processing responses intended for other controllers on the same network
 - Corrupt TCP stream detection with immediate disconnect on invalid ACN headers
 - Dedicated **🌐 RDMNet** tab with LLRP target list, broker controls, and client roster
+
+---
+
+## RDM Device Emulator
+
+DMXRouter can impersonate RDM fixtures on the network — useful for pre-programming shows before hardware arrives, testing RDM controllers, or keeping console configurations stable when swapping equipment.
+
+### Capture and emulate
+
+Right-click any discovered device in the RDM tab and select **🤖 Capture for Emulation** to save its complete RDM identity: manufacturer, model, label, DMX footprint, personalities, slot map, and all supported parameters. In the **🤖 Emulator** tab, assign a virtual Art-Net port address and activate the profile. From that moment, DMXRouter announces the device via ArtTodData and responds to RDM queries exactly as the original fixture would.
+
+### What controllers see
+
+- Device appears in RDM discovery immediately — no manual TOD flush needed
+- Responds to GET/SET for all standard PIDs: DEVICE_INFO, MANUFACTURER_LABEL, DEVICE_MODEL_DESCRIPTION, DEVICE_LABEL, SOFTWARE_VERSION_LABEL, SUPPORTED_PARAMETERS, DMX_START_ADDRESS, DMX_PERSONALITY, slot descriptions, and more
+- NACK with the correct reason code for unsupported PIDs
+- Identify state can be toggled from the Emulator panel and is reflected in RDM responses
+- DMX start address and personality changes made via RDM are applied immediately and persist
+
+### Profile management
+
+- **Duplicate** — clone a profile and assign it a new UID for emulating multiple units of the same fixture type
+- **Export / Import** — save profiles as `.dmxrprofile` files to share between installations or build a library offline
+- Each profile shows when it was captured, an optional user note, and the full personality and slot breakdown
+
+### Technical details
+
+- Emulated devices are advertised via ArtPollReply as additional bind indices, grouped by Net and Subnet per Art-Net spec
+- Per-interface unicast receive sockets ensure correct RDM delivery when controller and emulator run on the same machine
+- Emulated UIDs are filtered from incoming ArtTodData to prevent self-discovery loops
+- Works with any Art-Net 4 controller; tested against DMXRouter's own RDM controller, dummyRDM, and real hardware gateways
 
 ---
 
@@ -331,7 +401,12 @@ The **📊 Monitor** tab provides a real-time view of all DMX data flowing throu
 ## User Interface
 
 ### Dockable Panels
-All 9 panels (Interfaces, Engines, Monitor, Cues, Stats, Discovery, RDM, Broker, LLRP) can be **detached into floating windows** — double-click any tab or drag it out. Ideal for multi-monitor setups: put the Monitor on your FOH screen, Engines on the tech desk, RDM on a tablet. Closing a floating panel snaps it back into the main window — panels are never lost. Keyboard shortcuts (Alt+1–9) work regardless of docked or floating state.
+All panels (Interfaces, Engines, Monitor, Cues, Stats, Discovery, RDM, RDM Emulator, Broker, LLRP, Remote Control) can be **detached into floating windows** — double-click any tab or drag it out. Ideal for multi-monitor setups: put the Monitor on your FOH screen, Engines on the tech desk, RDM on a tablet. Closing a floating panel snaps it back into the main window — panels are never lost. Keyboard shortcuts work regardless of docked or floating state.
+
+### Bulk Workflow Tools
+- **Reroute** — when a network interface changes IP, select the affected engines, click Reroute, and a From → To dialog swaps one interface for another across all selected engines at once (inputs, outputs, and control channels). Single-selection mode shows a per-slot detail view for fine-tuning.
+- **Rename with auto-increment** — select several engines, click Rename, enter a base name ending in a number (e.g., "Stage 1"), and they are named Stage 1, Stage 2, Stage 3 in selection order.
+- **Absolute universe field** — all control source panels (Remote Control, Show Cue, merge editor) include an Absolute field (Art-Net PA+1). Editing Absolute updates Net/Subnet/Universe and vice versa; switching between Art-Net and sACN preserves the universe address.
 
 ### Cross-Platform Visual Consistency
 The interface looks identical on Windows, macOS, and Linux — same font (Inter), same colors, same spacing. Platform-specific adaptations happen under the hood:
@@ -350,7 +425,7 @@ All settings are saved to a single JSON file via **File → Save Config** (Ctrl+
 
 **Session persistence** — enabled network interfaces, VLANs, and cue recorder state are saved independently of process engines and restored on every launch, even with no engines configured.
 
-**Update checker** — automatically checks GitHub for new releases at startup (with a 3-second delay). Manual check available in the Help menu. Platform-specific asset detection for direct download links.
+**Update checker** — automatically checks GitHub for new releases at startup (with a 3-second delay). When a new version is available, a persistent orange button appears in the status bar; clicking it opens a dialog where you can download the update, dismiss it for later, or ignore that specific version permanently. Manual check available in the Help menu. Platform-specific asset detection for direct download links.
 
 Example configuration excerpt:
 
@@ -389,7 +464,9 @@ Example configuration excerpt:
 
 **Multi-stage processing** — chain process engines using internal routing: first engine merges two consoles via HTP, second engine crossfades the result with a media server, third engine applies a master dimmer. No physical loopback required.
 
-**Show automation** — record cue snapshots during rehearsal and play them back during the performance with configurable crossfade times, triggered manually, on a timer, or from a DMX control channel on the desk.
+**Show automation** — record snapshot cues during rehearsal and play them back during the performance with configurable crossfade times and fade curves. Record DMX sequences for time-based effects (moving lights, color chases) and use autopilot to run self-advancing shows unattended. Trigger everything manually, on a timer, or from a DMX control channel on the desk.
+
+**Pre-programming with the RDM emulator** — capture profiles from existing fixtures, then emulate them on a different site or machine. The console discovers and patches the virtual fixtures as if the real hardware were connected, so show files are ready before the truck arrives.
 
 **Fixture repatching** — remap RGB → BGR for fixtures wired in a non-standard order, or offset a dimmer rack that starts at an unusual DMX address, without touching the console patch.
 
@@ -410,8 +487,8 @@ Download and run `DMXRouter-Setup.exe`. All dependencies are included.
 
 ### Linux
 Download the binary for your architecture from the [Releases](https://github.com/fiverecords/DMXRouter/releases) page:
-- `DMXRouter-v1.4.1-linux-amd64.tar.gz` — standard PCs and servers
-- `DMXRouter-v1.4.1-linux-arm64.tar.gz` — Raspberry Pi 4/5, Orange Pi, and other ARM64 boards
+- `DMXRouter-v1.5.0-linux-x86_64.zip` — standard PCs and servers
+- `DMXRouter-v1.5.0-linux-arm64.zip` — Raspberry Pi 4/5, Orange Pi, and other ARM64 boards
 
 Qt6 runtime libraries are required:
 
@@ -449,4 +526,4 @@ This application uses **Qt 6**, licensed under the LGPL v3. Qt is dynamically li
 
 ---
 
-*DMXRouter v1.4.2 — Built for the stage.*
+*DMXRouter v1.5.0 — Built for the stage.*
