@@ -226,6 +226,8 @@ When autopilot is enabled (✈ Auto), the engine automatically advances to the n
 
 ## RDM & RDMNet
 
+![RDM](docs/RDM.png)
+
 ### RDM — ANSI E1.20
 - Discover devices on any Art-Net universe (ArtRdm packets)
 - Identify, set DMX start address, device label, and personality
