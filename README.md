@@ -6,6 +6,8 @@ DMXRouter is a high-performance, cross-platform application written in C++ with 
 
 ---
 
+![Vlan Manager](docs/Vlan-Manager.png)
+
 ## Features at a Glance
 
 - **Multi-protocol routing** — Art-Net 4, sACN (E1.31 2018), with full cross-protocol bridging
