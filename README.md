@@ -341,6 +341,8 @@ The universe monitor includes an **oscilloscope-style waveform display** for det
 
 ## Network Discovery
 
+![Node config](docs/NodeConfig.png)
+
 The **🔍 Discovery** tab shows all Art-Net nodes and sACN sources visible on the network in real time.
 
 **Art-Net nodes:** short name, long name, firmware version, IP, port count, active universes. Remote configuration via ArtAddress and ArtIpProg directly from the UI. Dynamic port controls adapt to the actual port count reported by each node, with per-port universe display, merge mode, direction, RDM enable, output style, and protocol selection. Art-Net universes show absolute universe numbers alongside the standard Net.Subnet.Universe notation. Nodes removed 60 seconds after last reply.
