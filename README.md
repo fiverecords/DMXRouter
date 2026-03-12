@@ -271,6 +271,8 @@ When autopilot is enabled (✈ Auto), the engine automatically advances to the n
 
 ## RDM Device Emulator
 
+![RDM Emulator](docs/RDM-Emulator.png)
+
 DMXRouter can impersonate RDM fixtures on the network — useful for pre-programming shows before hardware arrives, testing RDM controllers, or keeping console configurations stable when swapping equipment.
 
 ### Capture and emulate
