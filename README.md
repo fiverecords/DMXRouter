@@ -160,6 +160,8 @@ Each merge engine accepts **up to 4 inputs** and produces one merged output. Up 
 
 ## Show Cue System
 
+![Cues](docs/Cues.png)
+
 DMXRouter includes a complete show programming and playback engine for automated lighting control, supporting both instantaneous snapshots and time-based sequence recordings.
 
 ### Cue Types
@@ -400,6 +402,8 @@ DMXRouter provides cross-platform virtual network adapter management for product
 ---
 
 ## Statistics & Logging
+
+![Stats](docs/stats.png)
 
 The **📈 Stats & Log** tab provides live operational visibility.
 
