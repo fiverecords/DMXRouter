@@ -275,7 +275,7 @@ When autopilot is enabled (✈ Auto), the engine automatically advances to the n
 
 ## RDM Device Emulator
 
-![RDM Emulator](docs/RDM-Emulator.png)
+![RDM Emulator](docs/RDMEmulator.png)
 
 DMXRouter can impersonate RDM fixtures on the network — useful for pre-programming shows before hardware arrives, testing RDM controllers, or keeping console configurations stable when swapping equipment.
 
@@ -403,7 +403,7 @@ DMXRouter provides cross-platform virtual network adapter management for product
 
 ## Statistics & Logging
 
-![Stats](docs/stats.png)
+![Stats](docs/Stats.png)
 
 The **📈 Stats & Log** tab provides live operational visibility.
 
@@ -418,6 +418,8 @@ The **📈 Stats & Log** tab provides live operational visibility.
 **Event log** — ring buffer of 10,000 entries, thread-safe. Captures all `qDebug` / `qInfo` / `qWarning` / `qCritical` output. Automatic category tagging (ArtNet, sACN, Transport, Merge, Discovery, Network, System). Filterable by level and category. Auto-scroll toggle, Clear button, monospace font. **Pop-out button** detaches the log into its own window — filters, auto-scroll, and live entries keep working while floating; close or click Dock to snap it back.
 
 ## User Interface
+
+![Remote](docs/RemoteInput.png)
 
 ### Dockable Panels
 All panels (Interfaces, Engines, Monitor, Cues, Stats, Discovery, RDM, RDM Emulator, Broker, LLRP, Remote Control) can be **detached into floating windows** — double-click any tab or drag it out. Ideal for multi-monitor setups: put the Monitor on your FOH screen, Engines on the tech desk, RDM on a tablet. Closing a floating panel snaps it back into the main window — panels are never lost. Keyboard shortcuts work regardless of docked or floating state.
