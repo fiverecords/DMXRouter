@@ -128,6 +128,8 @@ The output of one process engine can be fed as the input to another, enabling ca
 
 ## Merge Engine
 
+![Engines](docs/Engines.png)
+
 Each merge engine accepts **up to 4 inputs** and produces one merged output. Up to **512 engines** can run simultaneously.
 
 ### Merge Modes
@@ -322,6 +324,8 @@ Full channel-level remapping applied after merge and before output.
 ---
 
 ## Channel History
+
+![Monitor](docs/Monitor.png)
 
 The universe monitor includes an **oscilloscope-style waveform display** for detailed channel-level analysis.
 
