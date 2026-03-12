@@ -327,9 +327,22 @@ Full channel-level remapping applied after merge and before output.
 
 ---
 
-## Channel History
+## Universe Monitor
 
 ![Monitor](docs/Monitor.png)
+
+The **📊 Monitor** tab provides a real-time view of all DMX data flowing through the system.
+
+- **Per-interface filtering** — dropdown populated dynamically as interfaces appear, allowing inspection of specific network paths when the same universe arrives on multiple NICs or VLANs
+- **Direction filter** — isolate input-only or output-only traffic
+- **Protocol filter** — view Art-Net, sACN, or both
+- **DMX / Priority view toggle** — switch between standard DMX levels (0–255) and sACN per-channel priority data (0xDD start code). Priority view uses a dedicated color palette: blue (low) → green (default 100) → orange/red (high/max 200). Hover shows the exact priority value and level label
+- **Priority indicators** — universe list entries carrying 0xDD data show a `[P]` tag; when multiple sources disagree on priority, both values are shown (e.g., `pri:100/150`)
+- **Grid view** — 32×16 channel grid with colour-coded values and amber selection highlight
+- **Absolute universe display** — Art-Net universes show `0.1.0 (17)` with 1-based absolute numbering
+- **Active channel count** — shows how many channels are above zero
+- **Channel history** — click any channel to open the oscilloscope waveform view
+- **VLAN-friendly naming** — long adapter names like `DMXRouter_VLAN200` are automatically abbreviated to `VLAN 200` for readability
 
 The universe monitor includes an **oscilloscope-style waveform display** for detailed channel-level analysis.
 
@@ -399,25 +412,6 @@ The **📈 Stats & Log** tab provides live operational visibility.
 **Per-universe breakdown** — packet rates, merge operation counts, sequence errors, last-seen timestamp.
 
 **Event log** — ring buffer of 10,000 entries, thread-safe. Captures all `qDebug` / `qInfo` / `qWarning` / `qCritical` output. Automatic category tagging (ArtNet, sACN, Transport, Merge, Discovery, Network, System). Filterable by level and category. Auto-scroll toggle, Clear button, monospace font. **Pop-out button** detaches the log into its own window — filters, auto-scroll, and live entries keep working while floating; close or click Dock to snap it back.
-
----
-
-## Universe Monitor
-
-The **📊 Monitor** tab provides a real-time view of all DMX data flowing through the system.
-
-- **Per-interface filtering** — dropdown populated dynamically as interfaces appear, allowing inspection of specific network paths when the same universe arrives on multiple NICs or VLANs
-- **Direction filter** — isolate input-only or output-only traffic
-- **Protocol filter** — view Art-Net, sACN, or both
-- **DMX / Priority view toggle** — switch between standard DMX levels (0–255) and sACN per-channel priority data (0xDD start code). Priority view uses a dedicated color palette: blue (low) → green (default 100) → orange/red (high/max 200). Hover shows the exact priority value and level label
-- **Priority indicators** — universe list entries carrying 0xDD data show a `[P]` tag; when multiple sources disagree on priority, both values are shown (e.g., `pri:100/150`)
-- **Grid view** — 32×16 channel grid with colour-coded values and amber selection highlight
-- **Absolute universe display** — Art-Net universes show `0.1.0 (17)` with 1-based absolute numbering
-- **Active channel count** — shows how many channels are above zero
-- **Channel history** — click any channel to open the oscilloscope waveform view
-- **VLAN-friendly naming** — long adapter names like `DMXRouter_VLAN200` are automatically abbreviated to `VLAN 200` for readability
-
----
 
 ## User Interface
 
