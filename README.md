@@ -6,6 +6,8 @@ DMXRouter is a high-performance, cross-platform application written in C++ with 
 
 ---
 
+![Vlan Manager](docs/Vlan-Manager.png)
+
 ## Features at a Glance
 
 - **Multi-protocol routing** — Art-Net 4, sACN (E1.31 2018), with full cross-protocol bridging
@@ -126,6 +128,8 @@ The output of one process engine can be fed as the input to another, enabling ca
 
 ## Merge Engine
 
+![Engines](docs/Engines.png)
+
 Each merge engine accepts **up to 4 inputs** and produces one merged output. Up to **512 engines** can run simultaneously.
 
 ### Merge Modes
@@ -155,6 +159,8 @@ Each merge engine accepts **up to 4 inputs** and produces one merged output. Up 
 ---
 
 ## Show Cue System
+
+![Cues](docs/Cues.png)
 
 DMXRouter includes a complete show programming and playback engine for automated lighting control, supporting both instantaneous snapshots and time-based sequence recordings.
 
@@ -222,6 +228,8 @@ When autopilot is enabled (✈ Auto), the engine automatically advances to the n
 
 ## RDM & RDMNet
 
+![RDM](docs/RDM.png)
+
 ### RDM — ANSI E1.20
 - Discover devices on any Art-Net universe (ArtRdm packets)
 - Identify, set DMX start address, device label, and personality
@@ -266,6 +274,8 @@ When autopilot is enabled (✈ Auto), the engine automatically advances to the n
 ---
 
 ## RDM Device Emulator
+
+![RDM Emulator](docs/RDMEmulator.png)
 
 DMXRouter can impersonate RDM fixtures on the network — useful for pre-programming shows before hardware arrives, testing RDM controllers, or keeping console configurations stable when swapping equipment.
 
@@ -335,6 +345,8 @@ The universe monitor includes an **oscilloscope-style waveform display** for det
 
 ## Network Discovery
 
+![Node config](docs/NodeConfig.png)
+
 The **🔍 Discovery** tab shows all Art-Net nodes and sACN sources visible on the network in real time.
 
 **Art-Net nodes:** short name, long name, firmware version, IP, port count, active universes. Remote configuration via ArtAddress and ArtIpProg directly from the UI. Dynamic port controls adapt to the actual port count reported by each node, with per-port universe display, merge mode, direction, RDM enable, output style, and protocol selection. Art-Net universes show absolute universe numbers alongside the standard Net.Subnet.Universe notation. Nodes removed 60 seconds after last reply.
@@ -386,6 +398,8 @@ DMXRouter provides cross-platform virtual network adapter management for product
 
 ## Statistics & Logging
 
+![Stats](docs/Stats.png)
+
 The **📈 Stats & Log** tab provides live operational visibility.
 
 **Metrics dashboard** — 8 live cards: Packets In/s, Packets Out/s, Total In, Total Out, Active Universes, Error Count, Sequence Errors, Uptime. Colour-coded green / red / grey by state. Packet rates are normalized by actual elapsed time to eliminate jitter under load.
@@ -401,6 +415,8 @@ The **📈 Stats & Log** tab provides live operational visibility.
 ---
 
 ## Universe Monitor
+
+![Monitor](docs/Monitor.png)
 
 The **📊 Monitor** tab provides a real-time view of all DMX data flowing through the system.
 
@@ -418,6 +434,8 @@ The **📊 Monitor** tab provides a real-time view of all DMX data flowing throu
 ---
 
 ## User Interface
+
+![Remote](docs/RemoteInput.png)
 
 ### Dockable Panels
 All panels (Interfaces, Engines, Monitor, Cues, Stats, Discovery, RDM, RDM Emulator, Broker, LLRP, Remote Control) can be **detached into floating windows** — double-click any tab or drag it out. Ideal for multi-monitor setups: put the Monitor on your FOH screen, Engines on the tech desk, RDM on a tablet. Closing a floating panel snaps it back into the main window — panels are never lost. Keyboard shortcuts work regardless of docked or floating state.
@@ -550,4 +568,3 @@ This application uses **Qt 6**, licensed under the LGPL v3. Qt is dynamically li
 ---
 
 *DMXRouter v1.5.3 — Built for the stage.*
-
