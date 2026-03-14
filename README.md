@@ -6,8 +6,6 @@ DMXRouter is a high-performance, cross-platform application written in C++ with 
 
 ---
 
-![Vlan Manager](docs/Vlan-Manager.png)
-
 ## Features at a Glance
 
 - **Multi-protocol routing** — Art-Net 4, sACN (E1.31 2018), with full cross-protocol bridging
@@ -22,14 +20,14 @@ DMXRouter is a high-performance, cross-platform application written in C++ with 
 - **Channel-level patching** — per-channel remap, scale (0–200%), min/max limits, CSV import/export
 - **Channel history** — oscilloscope-style real-time waveform display for any DMX channel
 - **Network discovery** — live Art-Net node and sACN source discovery with protocol-aware remote node configuration
-- **VLAN management** — cross-platform virtual adapter management for production network segmentation (Windows Hyper-V, Linux ip/8021q, macOS ifconfig)
+- **VLAN management** — cross-platform virtual adapter management for production network segmentation (Windows Hyper-V, Linux NetworkManager, macOS networksetup). No need to run as root — each platform prompts for the admin password only when needed. VLANs and IPs persist across reboots on all three platforms.
 - **Real-time statistics** — per-interface and per-universe throughput metrics with live event log and pop-out log window
 - **Universe monitor** — real-time DMX data and sACN priority viewer with per-interface filtering for multi-NIC environments
 - **Bulk workflow tools** — Reroute (swap interfaces across multiple engines at once), Rename with auto-increment, Absolute universe addressing across all panels
 - **Profile manager** — save and recall complete configurations, with optional startup profile auto-load
 - **Update checker** — automatic new version detection via GitHub Releases, with persistent status bar button and per-version dismiss
 - **Cross-platform** — identical look and feel on Windows, Linux (x86-64 and ARM64), and macOS from a single codebase
-- **~43,000 lines of production C++17** — zero compiler warnings with strict flags (`-Wall -Wextra -Wpedantic` / `/W4`)
+- **~47,000 lines of production C++17** — zero compiler warnings with strict flags (`-Wall -Wextra -Wpedantic` / `/W4`)
 
 ---
 
@@ -128,8 +126,6 @@ The output of one process engine can be fed as the input to another, enabling ca
 
 ## Merge Engine
 
-![Engines](docs/Engines.png)
-
 Each merge engine accepts **up to 4 inputs** and produces one merged output. Up to **512 engines** can run simultaneously.
 
 ### Merge Modes
@@ -159,8 +155,6 @@ Each merge engine accepts **up to 4 inputs** and produces one merged output. Up 
 ---
 
 ## Show Cue System
-
-![Cues](docs/Cues.png)
 
 DMXRouter includes a complete show programming and playback engine for automated lighting control, supporting both instantaneous snapshots and time-based sequence recordings.
 
@@ -228,8 +222,6 @@ When autopilot is enabled (✈ Auto), the engine automatically advances to the n
 
 ## RDM & RDMNet
 
-![RDM](docs/RDM.png)
-
 ### RDM — ANSI E1.20
 - Discover devices on any Art-Net universe (ArtRdm packets)
 - Identify, set DMX start address, device label, and personality
@@ -274,8 +266,6 @@ When autopilot is enabled (✈ Auto), the engine automatically advances to the n
 ---
 
 ## RDM Device Emulator
-
-![RDM Emulator](docs/RDMEmulator.png)
 
 DMXRouter can impersonate RDM fixtures on the network — useful for pre-programming shows before hardware arrives, testing RDM controllers, or keeping console configurations stable when swapping equipment.
 
@@ -329,22 +319,7 @@ Full channel-level remapping applied after merge and before output.
 
 ---
 
-## Universe Monitor
-
-![Monitor](docs/Monitor.png)
-
-The **📊 Monitor** tab provides a real-time view of all DMX data flowing through the system.
-
-- **Per-interface filtering** — dropdown populated dynamically as interfaces appear, allowing inspection of specific network paths when the same universe arrives on multiple NICs or VLANs
-- **Direction filter** — isolate input-only or output-only traffic
-- **Protocol filter** — view Art-Net, sACN, or both
-- **DMX / Priority view toggle** — switch between standard DMX levels (0–255) and sACN per-channel priority data (0xDD start code). Priority view uses a dedicated color palette: blue (low) → green (default 100) → orange/red (high/max 200). Hover shows the exact priority value and level label
-- **Priority indicators** — universe list entries carrying 0xDD data show a `[P]` tag; when multiple sources disagree on priority, both values are shown (e.g., `pri:100/150`)
-- **Grid view** — 32×16 channel grid with colour-coded values and amber selection highlight
-- **Absolute universe display** — Art-Net universes show `0.1.0 (17)` with 1-based absolute numbering
-- **Active channel count** — shows how many channels are above zero
-- **Channel history** — click any channel to open the oscilloscope waveform view
-- **VLAN-friendly naming** — long adapter names like `DMXRouter_VLAN200` are automatically abbreviated to `VLAN 200` for readability
+## Channel History
 
 The universe monitor includes an **oscilloscope-style waveform display** for detailed channel-level analysis.
 
@@ -359,8 +334,6 @@ The universe monitor includes an **oscilloscope-style waveform display** for det
 ---
 
 ## Network Discovery
-
-![Node config](docs/NodeConfig.png)
 
 The **🔍 Discovery** tab shows all Art-Net nodes and sACN sources visible on the network in real time.
 
@@ -378,32 +351,40 @@ ArtPoll is **manually triggered** via toolbar button to avoid continuous backgro
 
 ## VLAN Management
 
-DMXRouter provides cross-platform virtual network adapter management for production network segmentation.
+DMXRouter provides cross-platform virtual network adapter management for production network segmentation. On all three platforms, VLANs are created as persistent OS-level network configurations that survive reboots — no need to reconfigure after a power cycle.
+
+**No root / sudo / Administrator required to launch.** The application runs as a normal user. When you create, remove, or configure a VLAN, the operating system shows its standard password dialog — just like installing software. You type your password once and it's cached for the session.
 
 ### Windows (Hyper-V)
 - Create / destroy Hyper-V Virtual Switch via asynchronous PowerShell
 - Add and remove VLANs with configurable IDs and names
-- Colour-coded VLAN table
+- Colour-coded VLAN table with Luminex group presets
 - Adapter filtering hides system adapters (Default Switch, management NICs)
 - Network diagnostics panel
-- Requires: Windows administrator privileges and Hyper-V feature enabled
+- Requires: Windows Pro/Enterprise with Hyper-V feature enabled
 
-### Linux
-- VLAN creation via `ip link` with 802.1Q tagging (`8021q` kernel module)
-- IP address assignment and interface lifecycle management
-- POSIX-compatible commands (no GNU-only dependencies)
+### Linux (NetworkManager)
+- VLAN creation via `nmcli` with persistent NetworkManager connections
+- Admin privilege elevation via PolicyKit (`pkexec`) — no need to run as root
+- IP address assignment persists across reboots
+- Short kernel interface names (`dmxr.200`) within the 15-character IFNAMSIZ limit
+- Requires: NetworkManager (`sudo apt install network-manager` if not present)
 
-### macOS
-- VLAN creation via `ifconfig` with BSD-native `vlan` interface naming
-- Automatic NIC configuration and IP assignment
+### macOS (networksetup)
+- VLAN creation via `networksetup` — each VLAN appears as a real network adapter in System Settings → Network
+- Admin privilege elevation via the native macOS password dialog — no need to run with `sudo`
+- IP address assignment persists across reboots
+- VLAN tag resolution via kernel ioctl for correct Luminex color mapping regardless of creation order
 
-> On all platforms, WiFi adapters, VPN tunnels, Docker bridges, and other non-Ethernet interfaces are filtered from the interface list. A clear advisory guides the user when prerequisites are not met.
+### Consistent across platforms
+- **VLAN 1 (Management / untagged)** is shown in the VLAN table on all platforms, representing the parent NIC. You can assign an IP to the parent NIC directly from the VLAN Manager.
+- WiFi adapters, VPN tunnels, Docker bridges, and other non-Ethernet interfaces are filtered from the interface list
+- A clear advisory guides the user when prerequisites are not met
+- Scan for existing VLANs created outside DMXRouter
 
 ---
 
 ## Statistics & Logging
-
-![Stats](docs/Stats.png)
 
 The **📈 Stats & Log** tab provides live operational visibility.
 
@@ -417,9 +398,26 @@ The **📈 Stats & Log** tab provides live operational visibility.
 
 **Event log** — ring buffer of 10,000 entries, thread-safe. Captures all `qDebug` / `qInfo` / `qWarning` / `qCritical` output. Automatic category tagging (ArtNet, sACN, Transport, Merge, Discovery, Network, System). Filterable by level and category. Auto-scroll toggle, Clear button, monospace font. **Pop-out button** detaches the log into its own window — filters, auto-scroll, and live entries keep working while floating; close or click Dock to snap it back.
 
-## User Interface
+---
 
-![Remote](docs/RemoteInput.png)
+## Universe Monitor
+
+The **📊 Monitor** tab provides a real-time view of all DMX data flowing through the system.
+
+- **Per-interface filtering** — dropdown populated dynamically as interfaces appear, allowing inspection of specific network paths when the same universe arrives on multiple NICs or VLANs
+- **Direction filter** — isolate input-only or output-only traffic
+- **Protocol filter** — view Art-Net, sACN, or both
+- **DMX / Priority view toggle** — switch between standard DMX levels (0–255) and sACN per-channel priority data (0xDD start code). Priority view uses a dedicated color palette: blue (low) → green (default 100) → orange/red (high/max 200). Hover shows the exact priority value and level label
+- **Priority indicators** — universe list entries carrying 0xDD data show a `[P]` tag; when multiple sources disagree on priority, both values are shown (e.g., `pri:100/150`)
+- **Grid view** — 32×16 channel grid with colour-coded values and amber selection highlight
+- **Absolute universe display** — Art-Net universes show `0.1.0 (17)` with 1-based absolute numbering
+- **Active channel count** — shows how many channels are above zero
+- **Channel history** — click any channel to open the oscilloscope waveform view
+- **VLAN-friendly naming** — long adapter names like `DMXRouter_VLAN200` are automatically abbreviated to `VLAN 200` for readability
+
+---
+
+## User Interface
 
 ### Dockable Panels
 All panels (Interfaces, Engines, Monitor, Cues, Stats, Discovery, RDM, RDM Emulator, Broker, LLRP, Remote Control) can be **detached into floating windows** — double-click any tab or drag it out. Ideal for multi-monitor setups: put the Monitor on your FOH screen, Engines on the tech desk, RDM on a tablet. Closing a floating panel snaps it back into the main window — panels are never lost. Keyboard shortcuts work regardless of docked or floating state.
@@ -510,8 +508,8 @@ Download and run `DMXRouter-Setup.exe`. All dependencies are included.
 
 ### Linux
 Download the binary for your architecture from the [Releases](https://github.com/fiverecords/DMXRouter/releases) page:
-- `DMXRouter-v1.5.2-linux-x86_64.zip` — standard PCs and servers
-- `DMXRouter-v1.5.2-linux-arm64.zip` — Raspberry Pi 4/5, Orange Pi, and other ARM64 boards
+- `DMXRouter-v1.5.3-linux-x86_64.zip` — standard PCs and servers
+- `DMXRouter-v1.5.3-linux-arm64.zip` — Raspberry Pi 4/5, Orange Pi, and other ARM64 boards
 
 Qt6 runtime libraries are required:
 
@@ -532,10 +530,12 @@ chmod +x DMXRouter
 ./DMXRouter
 ```
 
-VLAN management requires root privileges (`sudo ./DMXRouter`) and the `vlan` kernel module (`sudo modprobe 8021q`).
+VLAN management requires NetworkManager (`sudo apt install network-manager` if not present). No need to run as root — the app prompts for your password when needed.
 
 ### macOS
-Download the `.app` bundle from the [Releases](https://github.com/fiverecords/DMXRouter/releases) page. Qt6 frameworks are bundled inside the application. Requires macOS 12.0 (Monterey) or later. On first launch you may need to allow it in System Settings → Privacy & Security.
+Download the `.app` bundle from the [Releases](https://github.com/fiverecords/DMXRouter/releases) page. Qt6 frameworks are bundled inside the application. Requires macOS 13.0 (Ventura) or later. On first launch you may need to allow it in System Settings → Privacy & Security.
+
+No need to run with `sudo` — the app prompts for your password when needed. VLANs appear in System Settings → Network and persist across reboots.
 
 ---
 
@@ -549,4 +549,5 @@ This application uses **Qt 6**, licensed under the LGPL v3. Qt is dynamically li
 
 ---
 
-*DMXRouter v1.5.2 — Built for the stage.*
+*DMXRouter v1.5.3 — Built for the stage.*
+
