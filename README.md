@@ -16,7 +16,7 @@ DMXRouter is a high-performance, cross-platform application written in C++ with 
 - **sACN per-channel priority** — full E1.31 0xDD support in merge and monitoring, with color-coded priority visualization
 - **Dockable panels** — all panels detach into floating windows for multi-monitor setups; drag, double-click, or use Alt+1–0
 - **Show cue system** — snapshot and sequence recording, crossfade with selectable curves, autopilot auto-advance, loop/ping-pong playback, and DMX remote triggering
-- **RDM device management** — full E1.20 with device discovery, parameter control, sensor monitoring, fixture templates with per-model DMX address assignment, operating hours tracking, and large installation support (100+ fixtures)
+- **RDM device management** — full E1.20 with device discovery, parameter control, sensor monitoring, fixture templates with per-model DMX address assignment, operating hours tracking, Fixture ID (E1.37-5), automatic status message drain, and large installation support (100+ fixtures)
 - **RDM device emulator** — capture a real fixture's RDM profile, create virtual fixtures from scratch, or edit existing profiles — impersonate them on the network for pre-programming, controller testing, or equipment replacement
 - **RDMNet / LLRP** — E1.33 broker connection and LLRP device discovery
 - **Channel-level patching** — per-channel remap, scale (0–200%), min/max limits, CSV import/export
@@ -243,6 +243,9 @@ When autopilot is enabled (✈ Auto), the engine automatically advances to the n
 - **Full UTF-8 support** — manufacturer, model, label, software version, personality names, slot names, and sensor names display correctly in Chinese, Korean, and other non-Latin scripts
 - Full device cache with parameter persistence
 - **Personality column** — "Pers" column in the device tree shows the current mode (e.g., `3/12`) at a glance
+- **Fixture ID column** — "FID" column shows the E1.37-5 DEVICE_UNIT_NUMBER next to the DMX address, with GET/SET support in the Config tab
+- **Status message indicators** — the Status column shows ⚠ (red/orange) or ℹ (green) when a device has reported errors, warnings, or advisories via status messages. Tooltip shows the count breakdown
+- **Automatic status message drain** — when any RDM response has `messageCount > 0`, DMXRouter automatically drains the device output queue via GET QUEUED_MESSAGE. Status messages are accumulated per device and displayed in the tree and Status tab without manual polling
 - **DMX address overlap warning** — fixtures on the same port with overlapping channel ranges are highlighted in red with a conflict tooltip
 - **Stale indicator tuned for scale** — 3-minute threshold prevents healthy fixtures from greying out on large installations where keepalive cycles exceed 60 seconds
 - Interactive device tree in the **🔧 RDM** tab, sorted by DMX start address with device counts per port, DMX address ranges, and last-seen timestamps
@@ -251,6 +254,8 @@ When autopilot is enabled (✈ Auto), the engine automatically advances to the n
 ### Fixture Templates
 - Save a device's configuration (DMX address, personality, label, and parameters) as a reusable template keyed by manufacturer and model ID
 - **DMX address per model** — each template stores an optional DMX start address, editable directly in the template table. A global toggle — *Apply DMX address when using templates* — controls whether the address is sent to devices, making it easy to keep addresses configured but only activate them when needed (e.g., warehouse testing where every fixture of a model should start on the same channel)
+- **Lamp hours limit per model** — set a warning threshold in the template table. When a discovered device exceeds this value, the device name turns orange in the tree and the Info tab highlights the lamp hours in red
+- **Firmware mismatch warning** — templates capture the firmware version at save time. When applying to a device running different firmware, a warning dialog explains that personalities or behavior may have changed. Auto-apply logs mismatches to the transaction log. The template table shows the Model column in orange when a discovered device has a different firmware
 - **Auto-apply on discovery** — newly discovered devices matching a saved manufacturer/model pair receive their template configuration automatically, enabling hands-free commissioning of replacement fixtures
 - Templates stored as JSON and persist between sessions
 - Manual apply available for selective deployment from the Templates tab
@@ -511,7 +516,7 @@ Example configuration excerpt:
 
 **Large LED installation** — use sACN Universe Synchronization to ensure all universes are released simultaneously at receiver endpoints, eliminating visible tearing across a multi-universe LED wall.
 
-**Fixture fleet management** — use RDM fixture templates to pre-configure replacement fixtures automatically on discovery, and track operating hours across the entire installation for proactive lamp and LED driver maintenance scheduling. The personality column and DMX overlap warnings catch configuration errors before they reach the stage.
+**Fixture fleet management** — use RDM fixture templates to pre-configure replacement fixtures automatically on discovery, set lamp hours limits per model for proactive maintenance alerts, and track operating hours across the entire installation. Firmware mismatch warnings catch fixtures that have been updated since the template was saved. The personality column, Fixture ID, and DMX overlap warnings catch configuration errors before they reach the stage.
 
 **Warehouse testing** — assign a fixed DMX address per fixture model in the template table, enable the "Apply DMX address" toggle, and every fixture of that type gets addressed automatically on RDM discovery — no manual addressing needed for quick bench tests.
 
@@ -526,8 +531,8 @@ Download and run `DMXRouter-Setup.exe`. All dependencies are included.
 
 ### Linux
 Download the binary for your architecture from the [Releases](https://github.com/fiverecords/DMXRouter/releases) page:
-- `DMXRouter-v1.5.3-linux-x86_64.zip` — standard PCs and servers
-- `DMXRouter-v1.5.3-linux-arm64.zip` — Raspberry Pi 4/5, Orange Pi, and other ARM64 boards
+- `DMXRouter-v1.5.4-linux-x86_64.zip` — standard PCs and servers
+- `DMXRouter-v1.5.4-linux-arm64.zip` — Raspberry Pi 4/5, Orange Pi, and other ARM64 boards
 
 Qt6 runtime libraries are required:
 
@@ -567,4 +572,4 @@ This application uses **Qt 6**, licensed under the LGPL v3. Qt is dynamically li
 
 ---
 
-*DMXRouter v1.5.3 — Built for the stage.*
+*DMXRouter v1.5.4 — Built for the stage.*
