@@ -177,6 +177,8 @@ DMXRouter includes a complete show programming and playback engine for automated
 - Cues carry individual fade times, user labels, and recording timestamps
 - **Copy** — copy selected cues within the same show or to a different one
 - **Reorder** — move cues up or down in the list
+- **Renumber** — renumber selected cues or all cues with a start/step pattern (e.g. 1, 1.5, 2, 2.5)
+- **Undo** — 20-level undo stack (Ctrl+Z / Cmd+Z) covering delete, edit, and renumber operations
 
 ### Playback
 
@@ -395,6 +397,9 @@ DMXRouter provides cross-platform virtual network adapter management for product
 
 ### Consistent across platforms
 - **VLAN 1 (Management / untagged)** is shown in the VLAN table on all platforms, representing the parent NIC. You can assign an IP to the parent NIC directly from the VLAN Manager.
+- **Set IP / Set DHCP** — assign a static IP or switch to DHCP from a single dialog, available in both the VLAN Manager and the Interfaces tab. The dialog detects the current mode (manual/DHCP) and pre-fills the current IP and subnet mask.
+- **Subnet Mask column** in the VLAN table for at-a-glance network configuration.
+- **Friendly interface names** — macOS shows networksetup service names ("Thunderbolt Ethernet"), Linux shows NetworkManager connection names ("Wired connection 1") instead of kernel device names.
 - WiFi adapters, VPN tunnels, Docker bridges, and other non-Ethernet interfaces are filtered from the interface list
 - A clear advisory guides the user when prerequisites are not met
 - Scan for existing VLANs created outside DMXRouter
@@ -531,8 +536,8 @@ Download and run `DMXRouter-Setup.exe`. All dependencies are included.
 
 ### Linux
 Download the binary for your architecture from the [Releases](https://github.com/fiverecords/DMXRouter/releases) page:
-- `DMXRouter-v1.5.4-linux-x86_64.zip` — standard PCs and servers
-- `DMXRouter-v1.5.4-linux-arm64.zip` — Raspberry Pi 4/5, Orange Pi, and other ARM64 boards
+- `DMXRouter-v1.5.5-linux-x86_64.zip` — standard PCs and servers
+- `DMXRouter-v1.5.5-linux-arm64.zip` — Raspberry Pi 4/5, Orange Pi, and other ARM64 boards
 
 Qt6 runtime libraries are required:
 
@@ -555,21 +560,6 @@ chmod +x DMXRouter
 
 VLAN management requires NetworkManager (`sudo apt install network-manager` if not present). No need to run as root — the app prompts for your password when needed.
 
-### macOS
-Download the `.app` bundle from the [Releases](https://github.com/fiverecords/DMXRouter/releases) page. Qt6 frameworks are bundled inside the application. Requires macOS 13.0 (Ventura) or later. On first launch you may need to allow it in System Settings → Privacy & Security.
-
-No need to run with `sudo` — the app prompts for your password when needed. VLANs appear in System Settings → Network and persist across reboots.
-
----
-
-## License
-
-Copyright (c) 2026. All rights reserved.
-
-This software is proprietary. See the [LICENSE](LICENSE) file for full terms.
-
-This application uses **Qt 6**, licensed under the LGPL v3. Qt is dynamically linked and unmodified. See the [NOTICE](NOTICE) file for third-party attributions and your rights under the LGPL.
-
----
-
-*DMXRouter v1.5.4 — Built for the stage.*
+For high universe counts (100+), increase the UDP receive buffer limit:
+```bash
+sudo sysctl -w ne
