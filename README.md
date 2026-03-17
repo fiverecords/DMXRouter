@@ -110,6 +110,7 @@ Key design invariants:
 - Per-universe per-source priority (0x64 default, 0xDD per-channel override fully supported in merge and monitoring)
 - Per-channel priority 0 correctly handled — sources with priority 0 on a slot are excluded from the merge per E1.31 §6.2.3
 - **Universe Synchronization** — E1.31 Extended Sync packets (vector 0x00000001) for glitch-free multi-universe refresh on LED walls and large installations
+- **Configurable monitor range** — by default, universes 1–1024 are joined for multicast reception so incoming sACN traffic is visible immediately in the monitor and available for routing. Adjustable via a spinner in the Monitor tab toolbar (0–63999). Universes required by process engine inputs are always joined regardless of this setting
 - Universe Discovery (10-second cycle with pagination)
 - Stream termination handling
 - Protocol-aware sequence validation (0 is a valid wrap value in sACN, unlike Art-Net where seq 0 means "disabled")
@@ -229,9 +230,12 @@ When autopilot is enabled (✈ Auto), the engine automatically advances to the n
 
 ### DMX Remote Control
 
-- Any DMX channel on any universe can trigger snapshot take, sequence recording, play, stop, and cue selection from a lighting desk
+- Any DMX channel on any universe can trigger application actions from a lighting desk
+- **Main channel** — RDM Discovery, RDM Enable/Disable, Blackout All/Release, Capture Startup Buffers, All Identify Off, Alert Identify On/Off
+- **PE channel** — Enable/Disable/Toggle individual process engines by index
+- **Profile channel** — Recall saved profiles by number
 - Arm / disarm prevents accidental triggers on startup
-- Gap guard prevents cue flooding from noisy DMX faders
+- Gap guard prevents action flooding from noisy DMX faders
 
 ---
 
@@ -266,6 +270,7 @@ When autopilot is enabled (✈ Auto), the engine automatically advances to the n
 - **Lamp hours limit per model** — set a warning threshold in the template table. When a discovered device exceeds this value, the device name turns orange in the tree and the Info tab highlights the lamp hours in red
 - **Firmware mismatch warning** — templates capture the firmware version at save time. When applying to a device running different firmware, a warning dialog explains that personalities or behavior may have changed. Auto-apply logs mismatches to the transaction log. The template table shows the Model column in orange when a discovered device has a different firmware
 - **Auto-apply on discovery** — newly discovered devices matching a saved manufacturer/model pair receive their template configuration automatically, enabling hands-free commissioning of replacement fixtures
+- **Alert identify** — optional toggle that automatically puts fixtures into RDM Identify mode when a firmware mismatch or lamp hours limit is detected. The fixture flashes on the rig so the technician can locate it without checking the screen — useful for pre-show checks in large installations
 - Templates stored as JSON and persist between sessions
 - Manual apply available for selective deployment from the Templates tab
 
@@ -447,6 +452,7 @@ The **📊 Monitor** tab provides a real-time view of all DMX data flowing throu
 - **Active channel count** — shows how many channels are above zero
 - **Channel history** — click any channel to open the oscilloscope waveform view
 - **VLAN-friendly naming** — long adapter names like `DMXRouter_VLAN200` are automatically abbreviated to `VLAN 200` for readability
+- **sACN monitor range** — configurable in the Monitor tab toolbar (default: 1024 universes). Controls how many sACN multicast groups are joined automatically. Increase for large pixel-mapping or media server setups; universes beyond the range are still received if referenced by a process engine input
 
 ---
 
@@ -528,7 +534,7 @@ Example configuration excerpt:
 
 **Large LED installation** — use sACN Universe Synchronization to ensure all universes are released simultaneously at receiver endpoints, eliminating visible tearing across a multi-universe LED wall.
 
-**Fixture fleet management** — use RDM fixture templates to pre-configure replacement fixtures automatically on discovery, set lamp hours limits per model for proactive maintenance alerts, and track operating hours across the entire installation. Firmware mismatch warnings catch fixtures that have been updated since the template was saved. The personality column, Fixture ID, and DMX overlap warnings catch configuration errors before they reach the stage.
+**Fixture fleet management** — use RDM fixture templates to pre-configure replacement fixtures automatically on discovery, set lamp hours limits per model for proactive maintenance alerts, and track operating hours across the entire installation. Firmware mismatch warnings catch fixtures that have been updated since the template was saved. Enable "Identify on alert" to make problem fixtures flash on the rig automatically. The personality column, Fixture ID, and DMX overlap warnings catch configuration errors before they reach the stage.
 
 **Warehouse testing** — assign a fixed DMX address per fixture model in the template table, enable the "Apply DMX address" toggle, and every fixture of that type gets addressed automatically on RDM discovery — no manual addressing needed for quick bench tests.
 
