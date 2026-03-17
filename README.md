@@ -1,7 +1,7 @@
 # DMXRouter
 
 [![Latest Release](https://img.shields.io/github/v/release/fiverecords/DMXRouter?style=flat-square&color=blue)](https://github.com/fiverecords/DMXRouter/releases/latest)
-[![Downloads](https://img.shields.io/github/downloads/fiverecords/DMXRouter/total?style=flat-square&color=green)](https://github.com/fiverecords/DMXRouter/releases)
+[![GitHub Downloads](https://img.shields.io/github/downloads/fiverecords/DMXRouter/total?label=Downloads&color=blue)](https://github.com/fiverecords/DMXRouter/releases)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux%20%7C%20ARM64-lightgrey?style=flat-square)](https://github.com/fiverecords/DMXRouter/releases)
 [![C++17](https://img.shields.io/badge/C%2B%2B-17-blue?style=flat-square)](https://en.cppreference.com/w/cpp/17)
 [![Qt6](https://img.shields.io/badge/Qt-6-41cd52?style=flat-square)](https://www.qt.io/)
