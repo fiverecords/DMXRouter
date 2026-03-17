@@ -1,5 +1,12 @@
 # DMXRouter
 
+[![Latest Release](https://img.shields.io/github/v/release/fiverecords/DMXRouter?style=flat-square&color=blue)](https://github.com/fiverecords/DMXRouter/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/fiverecords/DMXRouter/total?style=flat-square&color=green)](https://github.com/fiverecords/DMXRouter/releases)
+[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux%20%7C%20ARM64-lightgrey?style=flat-square)](https://github.com/fiverecords/DMXRouter/releases)
+[![C++17](https://img.shields.io/badge/C%2B%2B-17-blue?style=flat-square)](https://en.cppreference.com/w/cpp/17)
+[![Qt6](https://img.shields.io/badge/Qt-6-41cd52?style=flat-square)](https://www.qt.io/)
+[![License](https://img.shields.io/badge/license-proprietary-red?style=flat-square)](LICENSE)
+
 **Professional DMX512 lighting control router for live entertainment and architectural installations.**
 
 DMXRouter is a high-performance, cross-platform application written in C++ with Qt6 that handles DMX512 data routing, merging, and show management across the major industry protocols. Designed for production environments where reliability and sub-millisecond timing are non-negotiable.
@@ -536,8 +543,8 @@ Download and run `DMXRouter-Setup.exe`. All dependencies are included.
 
 ### Linux
 Download the binary for your architecture from the [Releases](https://github.com/fiverecords/DMXRouter/releases) page:
-- `DMXRouter-v1.5.5-linux-x86_64.zip` — standard PCs and servers
-- `DMXRouter-v1.5.5-linux-arm64.zip` — Raspberry Pi 4/5, Orange Pi, and other ARM64 boards
+- `DMXRouter-v1.5.6-linux-x86_64.zip` — standard PCs and servers
+- `DMXRouter-v1.5.6-linux-arm64.zip` — Raspberry Pi 4/5, Orange Pi, and other ARM64 boards
 
 Qt6 runtime libraries are required:
 
@@ -562,4 +569,45 @@ VLAN management requires NetworkManager (`sudo apt install network-manager` if n
 
 For high universe counts (100+), increase the UDP receive buffer limit:
 ```bash
-sudo sysctl -w ne
+sudo sysctl -w net.core.rmem_max=8388608   # immediate
+echo "net.core.rmem_max=8388608" | sudo tee -a /etc/sysctl.d/99-dmxrouter.conf  # persist
+```
+
+### macOS
+Download the `.app` bundle from the [Releases](https://github.com/fiverecords/DMXRouter/releases) page. Qt6 frameworks are bundled inside the application. Requires macOS 13.0 (Ventura) or later. On first launch you may need to allow it in System Settings → Privacy & Security.
+
+**⚠ macOS Firewall (ALF) and real-time DMX performance**
+
+The macOS Application Layer Firewall adds per-packet CPU overhead to every incoming UDP packet, even when DMXRouter is explicitly allowed as an exception. This is a known macOS limitation that affects all high-packet-rate UDP applications — lighting, audio, Wireshark, amateur radio. Neither ad-hoc signing, Developer ID signing, nor firewall exception rules eliminate the overhead.
+
+**Option 1 — Disable ALF** (recommended for dedicated lighting machines on isolated production networks): System Settings → Network → Firewall → OFF.
+
+**Option 2 — Replace ALF with PF** (for machines that need firewall protection): Disable ALF as above, then use macOS's built-in Packet Filter (`pfctl`), which operates at network level without the per-socket overhead. Example rules for a lighting machine:
+
+```bash
+# Allow Art-Net (6454), sACN (5568), RDMNet range, block rest
+echo "pass in proto udp from any to any port {6454, 5568}" | sudo pfctl -ef -
+```
+
+See the release notes for a complete PF configuration example.
+
+No need to run with `sudo` — the app prompts for your password when needed. VLANs appear in System Settings → Network and persist across reboots.
+
+For high universe counts (100+), increase the UDP receive buffer:
+```bash
+sudo sysctl -w net.inet.udp.recvspace=8388608
+```
+
+---
+
+## License
+
+Copyright (c) 2026. All rights reserved.
+
+This software is proprietary. See the [LICENSE](LICENSE) file for full terms.
+
+This application uses **Qt 6**, licensed under the LGPL v3. Qt is dynamically linked and unmodified. See the [NOTICE](NOTICE) file for third-party attributions and your rights under the LGPL.
+
+---
+
+*DMXRouter v1.5.6 — Built for the stage.*
