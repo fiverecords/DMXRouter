@@ -582,6 +582,20 @@ echo "net.core.rmem_max=8388608" | sudo tee -a /etc/sysctl.d/99-dmxrouter.conf  
 ### macOS
 Download the `.app` bundle from the [Releases](https://github.com/fiverecords/DMXRouter/releases) page. Qt6 frameworks are bundled inside the application. Requires macOS 13.0 (Ventura) or later. On first launch you may need to allow it in System Settings → Privacy & Security.
 
+🍎 macOS Installation Note
+If you see a message stating that "DMXRouter is damaged and can’t be opened", this is a security restriction from macOS Gatekeeper on non-notarized apps. To fix this, move the app to your /Applications folder and run these two commands in your Terminal:
+ * Remove the quarantine flag:
+   ```bash
+   sudo xattr -rd com.apple.quarantine /Applications/DMXRouter.app
+   ```
+ * Re-sign the app locally:
+   ```bash
+   sudo codesign --force --deep --sign - /Applications/DMXRouter.app
+   ```
+> Note: These steps are required because DMXRouter now uses the native SystemConfiguration framework to manage IPs and VLANs. macOS requires a local signature to grant the app permission to interact with these system-level network APIs.
+
+
+
 **⚠ macOS Firewall (ALF) and real-time DMX performance**
 
 The macOS Application Layer Firewall adds per-packet CPU overhead to every incoming UDP packet, even when DMXRouter is explicitly allowed as an exception. This is a known macOS limitation that affects all high-packet-rate UDP applications — lighting, audio, Wireshark, amateur radio. Neither ad-hoc signing, Developer ID signing, nor firewall exception rules eliminate the overhead.
