@@ -35,8 +35,9 @@ DMXRouter is a high-performance, cross-platform application written in C++ with 
 - **Bulk workflow tools** — Reroute (swap interfaces across multiple engines at once), Rename with auto-increment, Absolute universe addressing across all panels
 - **Profile manager** — save and recall complete configurations, with optional startup profile auto-load
 - **Update checker** — automatic new version detection via GitHub Releases, with persistent status bar button and per-version dismiss
+- **Web remote control** — built-in HTTP + WebSocket server with a responsive web interface. Control playback, manage engines, operate RDM devices, and monitor stats from any phone, tablet, or browser on the network. Optional PIN authentication, PWA support (add to home screen), zero external dependencies
 - **Cross-platform** — identical look and feel on Windows, Linux (x86-64 and ARM64), and macOS from a single codebase
-- **~47,000 lines of production C++17** — zero compiler warnings with strict flags (`-Wall -Wextra -Wpedantic` / `/W4`)
+- **~55,000 lines of production C++17** — zero compiler warnings with strict flags (`-Wall -Wextra -Wpedantic` / `/W4`)
 
 ---
 
@@ -57,6 +58,7 @@ DMXRouter is a high-performance, cross-platform application written in C++ with 
 - [Universe Monitor](#universe-monitor)
 - [User Interface](#user-interface)
 - [Configuration](#configuration)
+- [Web Remote Control](#web-remote-control)
 - [Typical Use Cases](#typical-use-cases)
 - [Installation](#installation)
 - [License](#license)
@@ -77,9 +79,10 @@ DMXRouter runs on a **single-threaded event-loop architecture** driven by Qt's e
 ├───────────────┼──────────────┼──────────────┼─────────────┤
 │ RDMManager    │ RDMNetManager│ PatchManager │ RdmEmulator │
 │ (E1.20 RDM)   │ (E1.33/LLRP) │ (ch remap)   │ (virtual fx)│
-├───────────────┴──────────────┴──────────────┴─────────────┤
-│              Qt6 GUI (MainWindow + Widgets)               │
-└───────────────────────────────────────────────────────────┘
+├───────────────┼──────────────┴──────────────┴─────────────┤
+│ WebServer     │          Qt6 GUI (MainWindow + Widgets)   │
+│ (HTTP + WS)   │                                           │
+└───────────────┴───────────────────────────────────────────┘
 
 ```
 
@@ -192,8 +195,9 @@ DMXRouter includes a complete show programming and playback engine for automated
 
 - **Go** — advance to the next cue with a smooth crossfade
 - **Jump** — go to any cue by index
-- **Back / Forward** — pre-select the next cue without triggering
-- **Pause / Resume** — pause mid-crossfade or mid-sequence; resumes from exactly where it stopped
+- **Prev / Next** — pre-select the previous or next cue without triggering
+- **GoBack** — fire the previous cue
+- **Play / Pause** — single toggle button; starts playback, pauses mid-crossfade or mid-sequence, and resumes from exactly where it stopped
 - **Stop** — halt playback and inject a blackout
 - **Hold timer** — configurable auto-advance delay before the next cue fires
 
@@ -277,6 +281,7 @@ When autopilot is enabled (✈ Auto), the engine automatically advances to the n
 ### Fixture Database
 - Track operating hours, lamp hours, and power cycles for every RDM device in the installation
 - Timestamped snapshots build a usage history per fixture for maintenance planning
+- **Recording toggle** — pause and resume database writes without stopping RDM discovery; existing data is preserved
 - LED fixtures that don't support lamp hours no longer show misleading "0 hours" entries
 - CSV export for integration with external asset management and maintenance scheduling tools
 - Database cleanup to clear fixtures from previous sessions or venues
@@ -357,7 +362,7 @@ The universe monitor includes an **oscilloscope-style waveform display** for det
 - **Pause / resume** — freeze the view for inspection without losing incoming data
 - **Hover crosshair** — shows exact value and timestamp at any point on the waveform
 - **Min / max band** — dashed indicators show the value range over the visible window
-- **30 FPS rendering** with smooth continuous scrolling
+- **60 FPS rendering** with sub-pixel precision and smooth continuous scrolling
 - **Sample deduplication** — stable channels consume minimal memory regardless of observation time
 
 ---
@@ -412,7 +417,8 @@ DMXRouter provides cross-platform virtual network adapter management for product
 - **Set IP / Set DHCP** — assign a static IP or switch to DHCP from a single dialog, available in both the VLAN Manager and the Interfaces tab. The dialog detects the current mode (manual/DHCP) and pre-fills the current IP and subnet mask.
 - **Subnet Mask column** in the VLAN table for at-a-glance network configuration.
 - **Friendly interface names** — macOS shows networksetup service names ("Thunderbolt Ethernet"), Linux shows NetworkManager connection names ("Wired connection 1") instead of kernel device names.
-- WiFi adapters, VPN tunnels, Docker bridges, and other non-Ethernet interfaces are filtered from the interface list
+- WiFi adapters, VPN tunnels, TAP adapters, Bluetooth PAN, Docker bridges, and other non-Ethernet interfaces are filtered from the interface list. On Windows, adapter hardware descriptions are resolved via `GetAdaptersAddresses` to catch VPN/tunnel adapters that report as Ethernet.
+- **Disconnected adapters** (no link / cable unplugged) are shown dimmed with an Enable checkbox so you can pre-configure them before connecting the cable
 - A clear advisory guides the user when prerequisites are not met
 - Scan for existing VLANs created outside DMXRouter
 
@@ -512,6 +518,40 @@ Example configuration excerpt:
 
 ---
 
+## Web Remote Control
+
+![Web Remote](docs/WebRemote.png)
+
+DMXRouter includes an embedded **HTTP + WebSocket server** with a **built-in web interface** accessible from any browser on the network. Control playback, manage engines, monitor RDM devices, and view live stats from a phone, tablet, or laptop — no app install required.
+
+The server starts automatically on launch and listens on **port 9090** (HTTP) and **port 9091** (WebSocket). Point any browser at `http://<dmxrouter-ip>:9090` to open the interface. The API is also directly usable from curl, Postman, Bitfocus Companion, or custom automation scripts.
+
+### Web Interface
+
+The web interface is a responsive single-page application embedded in the binary — no external files, no CDN, no build step. Dark professional theme matching the desktop application. Sidebar navigation on desktop (≥768px), bottom tab bar on mobile.
+
+- **Playback** — full show management with all 9 transport controls (⏮️ Prev, ◀️ GoBack, ⏹️ Stop, Next ⏭️, GO, ▶️ Play / ⏸️ Pause, ◉ Take Snapshot, ⏺️ Rec, ✈️ Autopilot), cue list with inline editing, preset cue highlight, live fade and sequence progress bars, playback state per cue
+- **Engines** — enable/disable toggles, snapshot/failsafe, channel patch editing, 512-channel DMX output grid with color-coded intensity and fullscreen mode, global blackout
+- **RDM Devices** — device list grouped by gateway with DMX address range, Fixture ID, personality, probe progress, status indicators (✔/⚠/ℹ), and last seen time. DMX address conflicts highlighted in red. Inline SET for address, personality, and label
+- **Stats & Log** — live PPS, active universes, error count, per-interface breakdown, scrollable log with color-coded severity
+- **More** — profiles (full CRUD), interfaces and VLANs (combined view), discovered nodes, system info (version, platform, Qt, uptime)
+
+### Server Features
+
+- **Bidirectional sync** — changes from desktop push to web via WebSocket in real time, and vice versa
+- **Optional PIN authentication** — protects HTTP and WebSocket access. Saved in the browser for convenience
+- **WebSocket channels** — subscribe to playback, stats, RDM, engines, log, and interface events
+- **Self-describing API** — `GET /api` returns a JSON index of all endpoints and channels
+- **CORS enabled** — accessible from any web browser or third-party tool
+- **PWA support** — add to home screen for a native app experience
+- **Zero impact on DMX** — runs on Qt's event loop alongside all other operations
+
+### Configuration
+
+Open **Network → Web API...** to configure: enable/disable, bind address (restrict to a specific NIC), HTTP port, and PIN. Changes take effect immediately.
+
+---
+
 ## Typical Use Cases
 
 **Protocol bridge** — receive Art-Net from a console on one NIC, output sACN to fixtures on another, or the reverse. Each interface is independently addressed.
@@ -540,6 +580,8 @@ Example configuration excerpt:
 
 **Multi-monitor control** — detach the Universe Monitor onto the FOH screen, keep the Engines panel on the tech desk, and float the RDM panel on a tablet — all running from a single DMXRouter instance.
 
+**Remote show control** — open the web interface on a phone or tablet to run cues, trigger blackout, and monitor playback from anywhere on the lighting network. Use Bitfocus Companion with the REST API to build a StreamDeck page for hands-free operation.
+
 ---
 
 ## Installation
@@ -549,20 +591,20 @@ Download and run `DMXRouter-Setup.exe`. All dependencies are included.
 
 ### Linux
 Download the binary for your architecture from the [Releases](https://github.com/fiverecords/DMXRouter/releases) page:
-- `DMXRouter-v1.5.6-linux-x86_64.zip` — standard PCs and servers
-- `DMXRouter-v1.5.6-linux-arm64.zip` — Raspberry Pi 4/5, Orange Pi, and other ARM64 boards
+- `DMXRouter-v1.6.0-linux-x86_64.zip` — standard PCs and servers
+- `DMXRouter-v1.6.0-linux-arm64.zip` — Raspberry Pi 4/5, Orange Pi, and other ARM64 boards
 
 Qt6 runtime libraries are required:
 
 ```bash
 # Ubuntu / Debian / Raspberry Pi OS
-sudo apt install libqt6core6 libqt6gui6 libqt6widgets6 libqt6network6
+sudo apt install libqt6core6 libqt6gui6 libqt6widgets6 libqt6network6 libqt6websockets6 libqt6openglwidgets6
 
 # Fedora
-sudo dnf install qt6-qtbase
+sudo dnf install qt6-qtbase qt6-qtwebsockets
 
 # Arch
-sudo pacman -S qt6-base
+sudo pacman -S qt6-base qt6-websockets
 ```
 
 Then run:
@@ -580,21 +622,13 @@ echo "net.core.rmem_max=8388608" | sudo tee -a /etc/sysctl.d/99-dmxrouter.conf  
 ```
 
 ### macOS
-Download the `.app` bundle from the [Releases](https://github.com/fiverecords/DMXRouter/releases) page. Qt6 frameworks are bundled inside the application. Requires macOS 13.0 (Ventura) or later. On first launch you may need to allow it in System Settings → Privacy & Security.
+Download the `.app` bundle from the [Releases](https://github.com/fiverecords/DMXRouter/releases) page. Qt6 frameworks are bundled inside the application. Requires macOS 13.0 (Ventura) or later.
 
-🍎 macOS Installation Note
-If you see a message stating that "DMXRouter is damaged and can’t be opened", this is a security restriction from macOS Gatekeeper on non-notarized apps. To fix this, move the app to your /Applications folder and run these two commands in your Terminal:
- * Remove the quarantine flag:
-   ```bash
-   sudo xattr -rd com.apple.quarantine /Applications/DMXRouter.app
-   ```
- * Re-sign the app locally:
-   ```bash
-   sudo codesign --force --deep --sign - /Applications/DMXRouter.app
-   ```
-> Note: These steps are required because DMXRouter now uses the native SystemConfiguration framework to manage IPs and VLANs. macOS requires a local signature to grant the app permission to interact with these system-level network APIs.
-
-
+**First launch:** macOS quarantines apps downloaded from the internet. Double-click `install.command` (shipped alongside the app) to remove the quarantine and sign it locally — you only need to do this once. Alternatively, run manually in Terminal:
+```bash
+xattr -cr DMXRouter.app
+codesign --force --deep --sign - DMXRouter.app
+```
 
 **⚠ macOS Firewall (ALF) and real-time DMX performance**
 
@@ -630,4 +664,4 @@ This application uses **Qt 6**, licensed under the LGPL v3. Qt is dynamically li
 
 ---
 
-*DMXRouter v1.5.6 — Built for the stage.*
+*DMXRouter v1.6.0 — Built for the stage.*
