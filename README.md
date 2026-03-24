@@ -22,22 +22,23 @@ DMXRouter is a high-performance, cross-platform application written in C++ with 
 - **Universe merge engine** — 8 merge modes including HTP, LTP, Backup, X-Fade, Switch, and Custom per-channel policy
 - **sACN per-channel priority** — full E1.31 0xDD support in merge and monitoring, with color-coded priority visualization
 - **Dockable panels** — all panels detach into floating windows for multi-monitor setups; drag, double-click, or use Alt+1–0
-- **Show cue system** — snapshot and sequence recording, crossfade with selectable curves, autopilot auto-advance, loop/ping-pong playback, and DMX remote triggering
-- **RDM device management** — full E1.20 with device discovery, parameter control, sensor monitoring, fixture templates with per-model DMX address assignment, operating hours tracking, Fixture ID (E1.37-5), automatic status message drain, and large installation support (100+ fixtures)
+- **Show cue system** — snapshot and sequence recording, crossfade with selectable curves, autopilot auto-advance, loop/ping-pong playback, DMX remote triggering, and per-show import/export
+- **RDM device management** — full E1.20 with device discovery, parameter control, sensor monitoring, self-test discovery and triggering, fixture templates with per-model DMX address assignment, operating hours tracking, Fixture ID (E1.37-5), automatic status message drain, customizable device tree columns, and large installation support (100+ fixtures)
 - **RDM device emulator** — capture a real fixture's RDM profile, create virtual fixtures from scratch, or edit existing profiles — impersonate them on the network for pre-programming, controller testing, or equipment replacement
-- **RDMNet / LLRP** — E1.33 broker connection and LLRP device discovery
+- **RDMNet / LLRP** — E1.33 broker connection, LLRP device discovery with network recovery (E1.37-2), and identify management
+- **Show Mode** — live-show protection lock that blocks destructive and caution-level operations across the desktop GUI, web interface, and REST API while keeping playback fully available
 - **Channel-level patching** — per-channel remap, scale (0–200%), min/max limits, CSV import/export
 - **Channel history** — oscilloscope-style real-time waveform display for any DMX channel
-- **Network discovery** — live Art-Net node and sACN source discovery with protocol-aware remote node configuration
+- **Network discovery** — live Art-Net node and sACN source discovery with protocol-aware remote node configuration. Optional WiFi interface support for preprogramming scenarios without Ethernet
 - **VLAN management** — cross-platform virtual adapter management for production network segmentation (Windows Hyper-V, Linux NetworkManager, macOS networksetup). No need to run as root — each platform prompts for the admin password only when needed. VLANs and IPs persist across reboots on all three platforms.
 - **Real-time statistics** — per-interface and per-universe throughput metrics with live event log and pop-out log window
 - **Universe monitor** — real-time DMX data and sACN priority viewer with per-interface filtering for multi-NIC environments
-- **Bulk workflow tools** — Reroute (swap interfaces across multiple engines at once), Rename with auto-increment, Absolute universe addressing across all panels
-- **Profile manager** — save and recall complete configurations, with optional startup profile auto-load
+- **Bulk workflow tools** — Reroute (swap interfaces across multiple engines at once), Rename with auto-increment, Uni −/+ quick universe adjust for Forward engines, Engine Templates for rapid setup, Absolute universe addressing across all panels
+- **Profile manager** — save and recall complete configurations, profile preview before loading, preserve IP/VLAN option on recall, import/export profiles between machines, optional startup profile auto-load
 - **Update checker** — automatic new version detection via GitHub Releases, with persistent status bar button and per-version dismiss
 - **Web remote control** — built-in HTTP + WebSocket server with a responsive web interface. Control playback, manage engines, operate RDM devices, and monitor stats from any phone, tablet, or browser on the network. Optional PIN authentication, PWA support (add to home screen), zero external dependencies
 - **Cross-platform** — identical look and feel on Windows, Linux (x86-64 and ARM64), and macOS from a single codebase
-- **~55,000 lines of production C++17** — zero compiler warnings with strict flags (`-Wall -Wextra -Wpedantic` / `/W4`)
+- **~57,000 lines of production C++17** — zero compiler warnings with strict flags (`-Wall -Wextra -Wpedantic` / `/W4`)
 
 ---
 
@@ -190,6 +191,7 @@ DMXRouter includes a complete show programming and playback engine for automated
 - **Reorder** — move cues up or down in the list
 - **Renumber** — renumber selected cues or all cues with a start/step pattern (e.g. 1, 1.5, 2, 2.5)
 - **Undo** — 20-level undo stack (Ctrl+Z / Cmd+Z) covering delete, edit, and renumber operations
+- **Import / Export** — export individual shows to standalone JSON files for sharing between DMXRouter installations or as backups, import shows without replacing existing ones
 
 ### Playback
 
@@ -235,7 +237,7 @@ When autopilot is enabled (✈ Auto), the engine automatically advances to the n
 ### DMX Remote Control
 
 - Any DMX channel on any universe can trigger application actions from a lighting desk
-- **Main channel** — RDM Discovery, RDM Enable/Disable, Blackout All/Release, Capture Startup Buffers, All Identify Off, Alert Identify On/Off
+- **Main channel** — RDM Discovery, RDM Enable/Disable, Blackout All/Release, Capture Startup Buffers, All Identify Off, Alert Identify On/Off, Template Auto-Apply On/Off, Template Apply DMX Address On/Off
 - **PE channel** — Enable/Disable/Toggle individual process engines by index
 - **Profile channel** — Recall saved profiles by number
 - Arm / disarm prevents accidental triggers on startup
@@ -263,9 +265,13 @@ When autopilot is enabled (✈ Auto), the engine automatically advances to the n
 - **Fixture ID column** — "FID" column shows the E1.37-5 DEVICE_UNIT_NUMBER next to the DMX address, with GET/SET support in the Config tab
 - **Status message indicators** — the Status column shows ⚠ (red/orange) or ℹ (green) when a device has reported errors, warnings, or advisories via status messages. Tooltip shows the count breakdown
 - **Automatic status message drain** — when any RDM response has `messageCount > 0`, DMXRouter automatically drains the device output queue via GET QUEUED_MESSAGE. Status messages are accumulated per device and displayed in the tree and Status tab without manual polling
+- **Self-test workflow** — discover available self-tests via SELF_TEST_DESCRIPTION, trigger any test via PERFORM_SELFTEST from a dropdown in the Status tab, and monitor completion with automatic polling. Test results arrive as status messages via the auto-drain and appear in the status table and tree indicators
+- **Batch operations** — multi-select devices in the tree (Ctrl+click / Shift+click) and right-click: Identify All On/Off, Set Personality on all selected, Set Sequential Addresses (auto-increments by footprint), Fetch Info for all at once
+- **Sensor progress bars** — graphical bars in the Sensors tab with color coding: green within normal range, orange outside. Fallback to plain numbers when no range is defined
 - **DMX address overlap warning** — fixtures on the same port with overlapping channel ranges are highlighted in red with a conflict tooltip
 - **Stale indicator tuned for scale** — 3-minute threshold prevents healthy fixtures from greying out on large installations where keepalive cycles exceed 60 seconds
 - Interactive device tree in the **🔧 RDM** tab, sorted by DMX start address with device counts per port, DMX address ranges, and last-seen timestamps
+- **Customizable columns** — right-click the device tree header to show/hide columns (including Manufacturer and Model) and drag to reorder. Layout persists across sessions
 - RDM is **off by default** — toggle on via toolbar to avoid unintended bus traffic during live shows
 
 ### Fixture Templates
@@ -288,8 +294,10 @@ When autopilot is enabled (✈ Auto), the engine automatically advances to the n
 - Configurable minimum interval between snapshots to prevent redundant recordings
 
 ### RDMNet — ANSI E1.33 / LLRP
-- **LLRP discovery** — multicast probe on 239.255.250.133 and 239.255.250.134 with known-UID suppression
-- **RDM over LLRP** — send RDM commands to LLRP targets without an Art-Net path
+- **LLRP discovery** — multicast probe on 239.255.250.133 and 239.255.250.134 with interface-specific binding and TTL=1 (link-local). Interface selection is mandatory — no "All Interfaces" mode to prevent accidental multicast leakage
+- **RDM over LLRP** — send RDM commands to LLRP targets without an Art-Net path. Auto-fetches device info and network configuration on target select (no half-duplex bottleneck). Queries SUPPORTED_PARAMETERS first to avoid sending unsupported PIDs
+- **LLRP network recovery (E1.37-2)** — read and set static IP, subnet mask, gateway, and DHCP mode on any LLRP target. Fields pre-fill from the device's current configuration. DHCP toggle visually disables static fields. Staged re-read after apply catches DHCP lease assignments. Confirmation dialog warns before applying changes that could make the device unreachable
+- **Identify management** — identify icon and amber row highlighting in the LLRP target table, matching the RDM device tree visual style. Identify state is cached per target and synced to the toggle button on select
 - **Broker connection** — TCP with full Client Connect handshake, 15-second heartbeat, Client Fetch List, RPT Request/Notification/Status, and broker redirect (IPv4 and IPv6)
 - CID-based packet filtering prevents processing responses intended for other controllers on the same network
 - Corrupt TCP stream detection with immediate disconnect on invalid ACN headers
@@ -485,9 +493,11 @@ The interface looks identical on Windows, macOS, and Linux — same font (Inter)
 
 ## Configuration
 
-All settings are saved to a single JSON file via **File → Save Config** (Ctrl+S) and restored with **File → Load Config** (Ctrl+O). The file includes: routing table, merge engine configurations, channel patches, show cues, VLAN settings, discovery preferences, and application version. The application tracks unsaved changes and prompts on close.
+All settings are saved to a single JSON file via **File → Save Config** (Ctrl+S) and restored with **File → Load Config** (Ctrl+O). The file includes: routing table, merge engine configurations, channel patches, show cues, VLAN settings, discovery preferences, and application version. The application tracks unsaved changes and prompts on close — if the save fails (permissions, disk full), the close is aborted so no work is lost. All persistent files (profiles, RDM templates, emulator profiles) use atomic writes to prevent corruption from power loss or crashes.
 
-**Profile Manager** allows saving named snapshots of the complete configuration for quick recall during productions. Up to 40 profiles stored on disk. A profile can be pinned as **⭐ Startup Profile** to load automatically on launch instead of the last session.
+**Profile Manager** allows saving named snapshots of the complete configuration for quick recall during productions. Up to 40 profiles stored on disk. A profile can be pinned as **⭐ Startup Profile** to load automatically on launch instead of the last session. Profile preview shows engine details before loading. Import/export profiles as portable JSON files for sharing between machines. The **Preserve IP** option (enabled by default) keeps the current network and VLAN configuration when recalling a profile from a different machine.
+
+**Engine Templates** — the Templates button in the process engine toolbar creates pre-configured engine batches (8×/16× Forward sACN, 8×/16× Forward Art-Net, HTP Merge, LTP Merge, Backup Pair, X-Fade, Switch) with auto-assigned universe numbers based on existing engines.
 
 **Session persistence** — enabled network interfaces, VLANs, and cue recorder state are saved independently of process engines and restored on every launch, even with no engines configured.
 
@@ -531,7 +541,7 @@ The server starts automatically on launch and listens on **port 9090** (HTTP) an
 The web interface is a responsive single-page application embedded in the binary — no external files, no CDN, no build step. Dark professional theme matching the desktop application. Sidebar navigation on desktop (≥768px), bottom tab bar on mobile.
 
 - **Playback** — full show management with all 9 transport controls (⏮️ Prev, ◀️ GoBack, ⏹️ Stop, Next ⏭️, GO, ▶️ Play / ⏸️ Pause, ◉ Take Snapshot, ⏺️ Rec, ✈️ Autopilot), cue list with inline editing, preset cue highlight, live fade and sequence progress bars, playback state per cue
-- **Engines** — enable/disable toggles, snapshot/failsafe, channel patch editing, 512-channel DMX output grid with color-coded intensity and fullscreen mode, global blackout
+- **Engines** — enable/disable toggles, snapshot/failsafe, channel patch editing, 512-channel DMX output grid with color-coded intensity and fullscreen mode, global blackout, Show Mode toggle
 - **RDM Devices** — device list grouped by gateway with DMX address range, Fixture ID, personality, probe progress, status indicators (✔/⚠/ℹ), and last seen time. DMX address conflicts highlighted in red. Inline SET for address, personality, and label
 - **Stats & Log** — live PPS, active universes, error count, per-interface breakdown, scrollable log with color-coded severity
 - **More** — profiles (full CRUD), interfaces and VLANs (combined view), discovered nodes, system info (version, platform, Qt, uptime)
@@ -587,12 +597,12 @@ Open **Network → Web API...** to configure: enable/disable, bind address (rest
 ## Installation
 
 ### Windows
-Download and run `DMXRouter-Setup.exe`. All dependencies are included.
+Download and run `DMXRouter-Setup.exe`. All dependencies are included. UAC will prompt for administrator privileges automatically if your account has them — this enables VLAN management without needing to right-click "Run as administrator".
 
 ### Linux
 Download the binary for your architecture from the [Releases](https://github.com/fiverecords/DMXRouter/releases) page:
-- `DMXRouter-v1.6.1-linux-x86_64.zip` — standard PCs and servers
-- `DMXRouter-v1.6.1-linux-arm64.zip` — Raspberry Pi 4/5, Orange Pi, and other ARM64 boards
+- `DMXRouter-v1.7.0-linux-x86_64.zip` — standard PCs and servers
+- `DMXRouter-v1.7.0-linux-arm64.zip` — Raspberry Pi 4/5, Orange Pi, and other ARM64 boards
 
 Qt6 runtime libraries are required:
 
@@ -664,4 +674,4 @@ This application uses **Qt 6**, licensed under the LGPL v3. Qt is dynamically li
 
 ---
 
-*DMXRouter v1.6.1 — Built for the stage.*
+*DMXRouter v1.7.0 — Built for the stage.*
