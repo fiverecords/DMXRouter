@@ -402,7 +402,7 @@ DMXRouter provides cross-platform virtual network adapter management for product
 ### Windows (Hyper-V)
 - Create / destroy Hyper-V Virtual Switch via asynchronous PowerShell
 - Add and remove VLANs with configurable IDs and names
-- Colour-coded VLAN table with Luminex group presets
+- Colour-coded VLAN table with industry-standard group colour presets
 - Adapter filtering hides system adapters (Default Switch, management NICs)
 - Network diagnostics panel
 - Requires: Windows Pro/Enterprise with Hyper-V feature enabled
@@ -418,7 +418,7 @@ DMXRouter provides cross-platform virtual network adapter management for product
 - VLAN creation via `networksetup` — each VLAN appears as a real network adapter in System Settings → Network
 - Admin privilege elevation via the native macOS password dialog — no need to run with `sudo`
 - IP address assignment persists across reboots
-- VLAN tag resolution via kernel ioctl for correct Luminex color mapping regardless of creation order
+- VLAN tag resolution via kernel ioctl for correct VLAN colour mapping regardless of creation order
 
 ### Consistent across platforms
 - **VLAN 1 (Management / untagged)** is shown in the VLAN table on all platforms, representing the parent NIC. You can assign an IP to the parent NIC directly from the VLAN Manager.
