@@ -23,14 +23,14 @@ DMXRouter is a high-performance, cross-platform application written in C++ with 
 - **sACN per-channel priority** — full E1.31 0xDD support in merge and monitoring, with color-coded priority visualization
 - **Dockable panels** — all panels detach into floating windows for multi-monitor setups; drag, double-click, or use Alt+1–0
 - **Show cue system** — snapshot and sequence recording, crossfade with selectable curves, autopilot auto-advance, loop/ping-pong playback, DMX remote triggering, and per-show import/export
-- **RDM device management** — full E1.20 with device discovery, parameter control, sensor monitoring, self-test discovery and triggering, fixture templates with per-model DMX address assignment, operating hours tracking, Fixture ID (E1.37-5), automatic status message drain, customizable device tree columns, and large installation support (100+ fixtures)
+- **RDM device management** — full E1.20 with device discovery, parameter control, sensor monitoring, self-test discovery and triggering, fixture templates with per-model DMX address assignment, operating hours tracking, Fixture ID (E1.37-5), manufacturer PID browser with per-device value caching, automatic status message drain, customizable device tree columns (including Serial and Rental ID from the Fixture Database), and large installation support (100+ fixtures)
 - **RDM device emulator** — capture a real fixture's RDM profile, create virtual fixtures from scratch, or edit existing profiles — impersonate them on the network for pre-programming, controller testing, or equipment replacement
 - **RDMNet / LLRP** — E1.33 broker connection, LLRP device discovery with network recovery (E1.37-2), and identify management
 - **Show Mode** — live-show protection lock that blocks destructive and caution-level operations across the desktop GUI, web interface, and REST API while keeping playback fully available
 - **Channel-level patching** — per-channel remap, scale (0–200%), min/max limits, CSV import/export
 - **Channel history** — oscilloscope-style real-time waveform display for any DMX channel
 - **Network discovery** — live Art-Net node and sACN source discovery with protocol-aware remote node configuration. Optional WiFi interface support for preprogramming scenarios without Ethernet
-- **VLAN management** — cross-platform virtual adapter management for production network segmentation (Windows Hyper-V, Linux NetworkManager, macOS networksetup). No need to run as root — each platform prompts for the admin password only when needed. VLANs and IPs persist across reboots on all three platforms.
+- **VLAN management** — cross-platform virtual adapter management for production network segmentation (Windows Hyper-V, Linux NetworkManager, macOS networksetup). Luminex group presets with colour-coded dropdown, plus a Custom entry for any VLAN ID (1–4094). No need to run as root — each platform prompts for the admin password only when needed. VLANs and IPs persist across reboots on all three platforms.
 - **Real-time statistics** — per-interface and per-universe throughput metrics with live event log and pop-out log window
 - **Universe monitor** — real-time DMX data and sACN priority viewer with per-interface filtering for multi-NIC environments
 - **Bulk workflow tools** — Reroute (swap interfaces across multiple engines at once), Rename with auto-increment, Uni −/+ quick universe adjust for Forward engines, Engine Templates for rapid setup, Absolute universe addressing across all panels
@@ -287,6 +287,8 @@ When autopilot is enabled (✈ Auto), the engine automatically advances to the n
 ### Fixture Database
 - Track operating hours, lamp hours, and power cycles for every RDM device in the installation
 - Timestamped snapshots build a usage history per fixture for maintenance planning
+- **Editable Serial Number, Rental ID, and Notes columns** — double-click to edit, values persist across sessions in the JSON database and are included in all CSV exports. Useful when the printed serial number doesn't match the RDM UID
+- **Serial and Rental ID columns in the RDM device tree** — hidden by default, right-click the header to enable them. Values are pulled from the Fixture Database
 - **Recording toggle** — pause and resume database writes without stopping RDM discovery; existing data is preserved
 - LED fixtures that don't support lamp hours no longer show misleading "0 hours" entries
 - CSV export for integration with external asset management and maintenance scheduling tools
@@ -412,6 +414,7 @@ DMXRouter provides cross-platform virtual network adapter management for product
 - Admin privilege elevation via PolicyKit (`pkexec`) — no need to run as root
 - IP address assignment persists across reboots
 - Short kernel interface names (`dmxr.200`) within the 15-character IFNAMSIZ limit
+- **Automatic IGMP multicast limit raise** — sACN uses one multicast group per universe; the default Linux limit (20) is too low for professional setups. DMXRouter detects and raises it to 1024 on startup
 - Requires: NetworkManager (`sudo apt install network-manager` if not present)
 
 ### macOS (networksetup)
@@ -421,6 +424,7 @@ DMXRouter provides cross-platform virtual network adapter management for product
 - VLAN tag resolution via kernel ioctl for correct VLAN colour mapping regardless of creation order
 
 ### Consistent across platforms
+- **Custom VLAN ID** — a "Custom" entry at the top of the VLAN dropdown lets you type any VLAN ID (1–4094), not just Luminex group presets
 - **VLAN 1 (Management / untagged)** is shown in the VLAN table on all platforms, representing the parent NIC. You can assign an IP to the parent NIC directly from the VLAN Manager.
 - **Set IP / Set DHCP** — assign a static IP or switch to DHCP from a single dialog, available in both the VLAN Manager and the Interfaces tab. The dialog detects the current mode (manual/DHCP) and pre-fills the current IP and subnet mask.
 - **Subnet Mask column** in the VLAN table for at-a-glance network configuration.
@@ -674,4 +678,4 @@ This application uses **Qt 6**, licensed under the LGPL v3. Qt is dynamically li
 
 ---
 
-*DMXRouter v1.7.2 — Built for the stage.*
+*DMXRouter v1.7.1 — Built for the stage.*
