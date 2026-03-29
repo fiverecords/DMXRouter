@@ -23,8 +23,8 @@ DMXRouter is a high-performance, cross-platform application written in C++ with 
 - **sACN per-channel priority** — full E1.31 0xDD support in merge and monitoring, with color-coded priority visualization
 - **Dockable panels** — all panels detach into floating windows for multi-monitor setups; drag, double-click, or use Alt+1–0
 - **Show cue system** — snapshot and sequence recording, crossfade with selectable curves, autopilot auto-advance, loop/ping-pong playback, DMX remote triggering, and per-show import/export
-- **RDM device management** — full E1.20 with device discovery, parameter control, sensor monitoring, self-test discovery and triggering, fixture templates with per-model DMX address assignment, operating hours tracking, Fixture ID (E1.37-5), manufacturer PID browser with per-device value caching, automatic status message drain, customizable device tree columns (including Serial and Rental ID from the Fixture Database), and large installation support (100+ fixtures)
-- **RDM device emulator** — capture a real fixture's RDM profile, create virtual fixtures from scratch, or edit existing profiles — impersonate them on the network for pre-programming, controller testing, or equipment replacement
+- **RDM device management** — full E1.20 with device discovery, parameter control, sensor monitoring, self-test discovery and triggering, fixture templates with per-model DMX address assignment, operating hours tracking, Fixture ID (E1.37-5), manufacturer PID browser with per-device value caching, automatic status message drain, customizable device tree columns (including Serial and Rental ID from the Fixture Database), preset scene management (E1.37-1 PRESET_INFO / PRESET_STATUS / CAPTURE_PRESET with inline editing of fade times), and large installation support (100+ fixtures)
+- **RDM device emulator** — deep-capture a real fixture's complete RDM identity (every supported PID response stored verbatim), create virtual fixtures from scratch, or edit existing profiles — impersonate them on the network for pre-programming, controller testing, or equipment replacement. Save as reusable templates with full PID data preserved
 - **RDMNet / LLRP** — E1.33 broker connection, LLRP device discovery with network recovery (E1.37-2), and identify management
 - **Show Mode** — live-show protection lock that blocks destructive and caution-level operations across the desktop GUI, web interface, and REST API while keeping playback fully available
 - **Channel-level patching** — per-channel remap, scale (0–200%), min/max limits, CSV import/export
@@ -34,11 +34,11 @@ DMXRouter is a high-performance, cross-platform application written in C++ with 
 - **Real-time statistics** — per-interface and per-universe throughput metrics with live event log and pop-out log window
 - **Universe monitor** — real-time DMX data and sACN priority viewer with per-interface filtering for multi-NIC environments
 - **Bulk workflow tools** — Reroute (swap interfaces across multiple engines at once), Rename with auto-increment, Uni −/+ quick universe adjust for Forward engines, Engine Templates for rapid setup, Absolute universe addressing across all panels
-- **Profile manager** — save and recall complete configurations, profile preview before loading, preserve IP/VLAN option on recall, import/export profiles between machines, optional startup profile auto-load
+- **Profile manager** — save and recall complete configurations, profile preview before loading, preserve IP/VLAN option on recall, import/export profiles between machines, optional startup profile auto-load. VLAN restore automatically scans the OS, imports existing adapters, creates missing ones (including vSwitch infrastructure on Windows), and applies saved IP addresses — with adapter selection dialog when multiple NICs are available
 - **Update checker** — automatic new version detection via GitHub Releases, with persistent status bar button and per-version dismiss
 - **Web remote control** — built-in HTTP + WebSocket server with a responsive web interface. Control playback, manage engines, operate RDM devices, and monitor stats from any phone, tablet, or browser on the network. Optional PIN authentication, PWA support (add to home screen), zero external dependencies
 - **Cross-platform** — identical look and feel on Windows, Linux (x86-64 and ARM64), and macOS from a single codebase
-- **~57,000 lines of production C++17** — zero compiler warnings with strict flags (`-Wall -Wextra -Wpedantic` / `/W4`)
+- **~59,000 lines of production C++17** — zero compiler warnings with strict flags (`-Wall -Wextra -Wpedantic` / `/W4`)
 
 ---
 
@@ -268,6 +268,7 @@ When autopilot is enabled (✈ Auto), the engine automatically advances to the n
 - **Self-test workflow** — discover available self-tests via SELF_TEST_DESCRIPTION, trigger any test via PERFORM_SELFTEST from a dropdown in the Status tab, and monitor completion with automatic polling. Test results arrive as status messages via the auto-drain and appear in the status table and tree indicators
 - **Batch operations** — multi-select devices in the tree (Ctrl+click / Shift+click) and right-click: Identify All On/Off, Set Personality on all selected, Set Sequential Addresses (auto-increments by footprint), Fetch Info for all at once
 - **Sensor progress bars** — graphical bars in the Sensors tab with color coding: green within normal range, orange outside. Fallback to plain numbers when no range is defined
+- **Preset scenes** — dedicated Presets tab for fixtures with internal scene storage (E1.37-1). Reads PRESET_INFO capabilities, fetches all scenes via PRESET_STATUS with sequential paced queries, displays fade up/down and wait times in an editable table (inline spinboxes for "Programmed" scenes, read-only for factory presets). Playback controls (Go/Off with scene selector), merge mode combo (Default/HTP/LTP/DMX Only), Capture to Scene, and Clear Scene — all without leaving the tab
 - **DMX address overlap warning** — fixtures on the same port with overlapping channel ranges are highlighted in red with a conflict tooltip
 - **Stale indicator tuned for scale** — 3-minute threshold prevents healthy fixtures from greying out on large installations where keepalive cycles exceed 60 seconds
 - Interactive device tree in the **🔧 RDM** tab, sorted by DMX start address with device counts per port, DMX address ranges, and last-seen timestamps
@@ -315,11 +316,11 @@ DMXRouter can impersonate RDM fixtures on the network — useful for pre-program
 
 ### Capture and emulate
 
-Right-click any discovered device in the RDM tab and select **🤖 Capture for Emulation** to save its complete RDM identity: manufacturer, model, label, DMX footprint, personalities, slot map, and all supported parameters. In the **🤖 Emulator** tab, assign a virtual Art-Net port address and activate the profile. From that moment, DMXRouter announces the device via ArtTodData and responds to RDM queries exactly as the original fixture would.
+Right-click any discovered device in the RDM tab and select **🤖 Capture for Emulation** to perform a **deep capture**: DMXRouter first fetches all advanced parameters, then sends a sequential GET for every PID the device supports. The raw response bytes are stored alongside the standard identity data (manufacturer, model, label, DMX footprint, personalities, slot map). The result is a perfect replica — any RDM controller querying the emulated device gets the exact same bytes the real fixture returned, including manufacturer-specific PIDs. In the **🤖 Emulator** tab, assign a virtual Art-Net port address and activate the profile.
 
 ### Create from scratch
 
-Click **＋ Create New** to define a virtual fixture without needing a physical device on the network. The dialog lets you configure manufacturer, model, device label, software version, product category, multiple personalities with individual channel counts, and a full slot/channel map using standard E1.20 slot labels (Intensity, Red, Green, Blue, Pan, Tilt, Zoom, Gobo, Strobe, and more). The slot table auto-resizes to match the first personality's footprint and preserves descriptions when the channel count changes.
+Click **＋ Create New** to define a virtual fixture without needing a physical device on the network. The dialog lets you configure manufacturer, model, device label, software version, product category, multiple personalities with individual channel counts, a full slot/channel map using standard E1.20 slot labels (Intensity, Red, Green, Blue, Pan, Tilt, Zoom, Gobo, Strobe, and more), and optional preset scene support with configurable scene count. The slot table auto-resizes to match the first personality's footprint and preserves descriptions when the channel count changes.
 
 ### Edit existing profiles
 
@@ -329,6 +330,7 @@ Click **✎ Edit** or use the right-click context menu to modify any profile —
 
 - Device appears in RDM discovery immediately — no manual TOD flush needed
 - Responds to GET/SET for all standard PIDs: DEVICE_INFO, MANUFACTURER_LABEL, DEVICE_MODEL_DESCRIPTION, DEVICE_LABEL, SOFTWARE_VERSION_LABEL, SUPPORTED_PARAMETERS, DMX_START_ADDRESS, DMX_PERSONALITY, DEVICE_HOURS, DEVICE_POWER_CYCLES, slot descriptions, and more
+- **Deep capture fallback** — any PID not handled by explicit emulator logic is answered from the captured raw response bytes. Manufacturer-specific PIDs, product details, boot info, and anything else the real device reported are replayed verbatim
 - NACK with the correct reason code for unsupported PIDs
 - Identify state can be toggled from the Emulator panel and is reflected in RDM responses
 - DMX start address and personality changes made via RDM are applied immediately and persist
@@ -337,13 +339,15 @@ Click **✎ Edit** or use the right-click context menu to modify any profile —
 
 - **Duplicate** — clone a profile and assign it a new UID for emulating multiple units of the same fixture type
 - **Export / Import** — save profiles as `.dmxrprofile` files to share between installations or build a library offline
+- **Save as Template** — button and right-click menu option to save a profile (including all deep-captured PID responses) to the Template Library for reuse. Instances created from templates inherit the full captured data
 - Each profile shows when it was captured, an optional user note, and the full personality and slot breakdown
 
 ### Technical details
 
 - Emulated devices are advertised via ArtPollReply as additional bind indices, grouped by Net and Subnet per Art-Net spec
-- Per-interface unicast receive sockets ensure correct RDM delivery when controller and emulator run on the same machine
-- Emulated UIDs are filtered from incoming ArtTodData to prevent self-discovery loops
+- **Local loopback** — emulated devices respond locally without network round-trip. DMXRouter's own RDM controller communicates directly with the emulator via an internal handler, bypassing the self-send filter. External controllers on the network also see and interact with emulated devices via ArtRdm
+- **Deep capture storage** — raw PID response bytes are serialized as hex→base64 in the JSON profile, surviving export/import and template conversion. Profiles captured from real fixtures can contain 30–80+ PID responses depending on the device
+- Preset scene support — emulator profiles can optionally expose E1.37-1 preset PIDs with configurable scene count and demo data for testing
 - Works with any Art-Net 4 controller; tested against DMXRouter's own RDM controller, dummyRDM, and real hardware gateways
 
 ---
@@ -427,6 +431,7 @@ DMXRouter provides cross-platform virtual network adapter management for product
 - **Custom VLAN ID** — a "Custom" entry at the top of the VLAN dropdown lets you type any VLAN ID (1–4094), not just Luminex group presets
 - **VLAN 1 (Management / untagged)** is shown in the VLAN table on all platforms, representing the parent NIC. You can assign an IP to the parent NIC directly from the VLAN Manager.
 - **Set IP / Set DHCP** — assign a static IP or switch to DHCP from a single dialog, available in both the VLAN Manager and the Interfaces tab. The dialog detects the current mode (manual/DHCP) and pre-fills the current IP and subnet mask.
+- **IP addresses saved in profiles** — VLAN IPs are read from the OS at save time and stored in profiles and configs. When loading on a different machine, IPs are restored automatically after VLAN creation. On the same machine, IPs are only reassigned when they differ from the current OS configuration.
 - **Subnet Mask column** in the VLAN table for at-a-glance network configuration.
 - **Friendly interface names** — macOS shows networksetup service names ("Thunderbolt Ethernet"), Linux shows NetworkManager connection names ("Wired connection 1") instead of kernel device names.
 - WiFi adapters, VPN tunnels, TAP adapters, Bluetooth PAN, Docker bridges, and other non-Ethernet interfaces are filtered from the interface list. On Windows, adapter hardware descriptions are resolved via `GetAdaptersAddresses` to catch VPN/tunnel adapters that report as Ethernet.
@@ -499,11 +504,11 @@ The interface looks identical on Windows, macOS, and Linux — same font (Inter)
 
 All settings are saved to a single JSON file via **File → Save Config** (Ctrl+S) and restored with **File → Load Config** (Ctrl+O). The file includes: routing table, merge engine configurations, channel patches, show cues, VLAN settings, discovery preferences, and application version. The application tracks unsaved changes and prompts on close — if the save fails (permissions, disk full), the close is aborted so no work is lost. All persistent files (profiles, RDM templates, emulator profiles) use atomic writes to prevent corruption from power loss or crashes.
 
-**Profile Manager** allows saving named snapshots of the complete configuration for quick recall during productions. Up to 40 profiles stored on disk. A profile can be pinned as **⭐ Startup Profile** to load automatically on launch instead of the last session. Profile preview shows engine details before loading. Import/export profiles as portable JSON files for sharing between machines. The **Preserve IP** option (enabled by default) keeps the current network and VLAN configuration when recalling a profile from a different machine.
+**Profile Manager** allows saving named snapshots of the complete configuration for quick recall during productions. Up to 40 profiles stored on disk. A profile can be pinned as **⭐ Startup Profile** to load automatically on launch instead of the last session. Profile preview shows engine details before loading. Import/export profiles as portable JSON files for sharing between machines. The **Preserve IP** option (enabled by default) keeps the current network and VLAN configuration when recalling a profile from a different machine. When disabled, DMXRouter scans the OS for existing VLAN adapters, imports matching ones without recreating them, creates any missing VLANs (including vSwitch infrastructure on Windows), and restores saved IP addresses — only reassigning when the current IP differs. If multiple physical NICs are available, a dialog asks which one to use for VLAN creation. File → Load Config includes the same Preserve IP checkbox.
 
 **Engine Templates** — the Templates button in the process engine toolbar creates pre-configured engine batches (8×/16× Forward sACN, 8×/16× Forward Art-Net, HTP Merge, LTP Merge, Backup Pair, X-Fade, Switch) with auto-assigned universe numbers based on existing engines.
 
-**Session persistence** — enabled network interfaces, VLANs, and cue recorder state are saved independently of process engines and restored on every launch, even with no engines configured.
+**Session persistence** — enabled network interfaces, VLANs (with IP addresses), and cue recorder state are saved independently of process engines and restored on every launch, even with no engines configured. Interface state is also saved in profiles and configs, so loading a configuration re-enables the same interfaces that were active when it was saved. When VLANs need to be created asynchronously, an event-driven deferred enable waits for each VLAN operation to complete before enabling the corresponding interface — adapting to any OS timing without hardcoded delays. Transport rebuilds are suppressed during the process and a single clean rebuild occurs when all interfaces are ready.
 
 **Update checker** — automatically checks GitHub for new releases at startup (with a 3-second delay). When a new version is available, a persistent orange button appears in the status bar; clicking it opens a dialog where you can download the update, dismiss it for later, or ignore that specific version permanently. Manual check available in the Help menu. Platform-specific asset detection for direct download links.
 
@@ -605,8 +610,8 @@ Download and run `DMXRouter-Setup.exe`. All dependencies are included. UAC will 
 
 ### Linux
 Download the binary for your architecture from the [Releases](https://github.com/fiverecords/DMXRouter/releases) page:
-- `DMXRouter-v1.7.1-linux-x86_64.zip` — standard PCs and servers
-- `DMXRouter-v1.7.1-linux-arm64.zip` — Raspberry Pi 4/5, Orange Pi, and other ARM64 boards
+- `DMXRouter-v1.7.4-linux-x86_64.zip` — standard PCs and servers
+- `DMXRouter-v1.7.4-linux-arm64.zip` — Raspberry Pi 4/5, Orange Pi, and other ARM64 boards
 
 Qt6 runtime libraries are required:
 
@@ -678,4 +683,4 @@ This application uses **Qt 6**, licensed under the LGPL v3. Qt is dynamically li
 
 ---
 
-*DMXRouter v1.7.3 — Built for the stage.*
+*DMXRouter v1.7.4 — Built for the stage.*
