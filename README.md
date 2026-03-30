@@ -38,7 +38,7 @@ DMXRouter is a high-performance, cross-platform application written in C++ with 
 - **Update checker** — automatic new version detection via GitHub Releases, with persistent status bar button and per-version dismiss
 - **Web remote control** — built-in HTTP + WebSocket server with a responsive web interface. Control playback, manage engines, operate RDM devices, and monitor stats from any phone, tablet, or browser on the network. Optional PIN authentication, PWA support (add to home screen), zero external dependencies
 - **Cross-platform** — identical look and feel on Windows, Linux (x86-64 and ARM64), and macOS from a single codebase
-- **~59,000 lines of production C++17** — zero compiler warnings with strict flags (`-Wall -Wextra -Wpedantic` / `/W4`)
+- **~60,800 lines of production C++17** — zero compiler warnings with strict flags (`-Wall -Wextra -Wpedantic` / `/W4`)
 
 ---
 
