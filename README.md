@@ -34,11 +34,12 @@ DMXRouter is a high-performance, cross-platform application written in C++ with 
 - **Real-time statistics** — per-interface and per-universe throughput metrics with live event log and pop-out log window
 - **Universe monitor** — real-time DMX data and sACN priority viewer with per-interface filtering for multi-NIC environments
 - **Bulk workflow tools** — Reroute (swap interfaces across multiple engines at once), Rename with auto-increment, Uni −/+ quick universe adjust for Forward engines, Engine Templates for rapid setup, Absolute universe addressing across all panels
+- **Engine groups** — organize process engines into collapsible, color-coded groups with drag-free reordering (Move Up/Down), tristate enable/disable, custom display order, and full profile persistence. Groups appear above ungrouped engines like folders before files
 - **Profile manager** — save and recall complete configurations, profile preview before loading, preserve IP/VLAN option on recall, import/export profiles between machines, optional startup profile auto-load. VLAN restore automatically scans the OS, imports existing adapters, creates missing ones (including vSwitch infrastructure on Windows), and applies saved IP addresses — with adapter selection dialog when multiple NICs are available
 - **Update checker** — automatic new version detection via GitHub Releases, with persistent status bar button and per-version dismiss
 - **Web remote control** — built-in HTTP + WebSocket server with a responsive web interface. Control playback, manage engines, operate RDM devices, and monitor stats from any phone, tablet, or browser on the network. Optional PIN authentication, PWA support (add to home screen), zero external dependencies
 - **Cross-platform** — identical look and feel on Windows, Linux (x86-64 and ARM64), and macOS from a single codebase
-- **~60,800 lines of production C++17** — zero compiler warnings with strict flags (`-Wall -Wextra -Wpedantic` / `/W4`)
+- **~61,200 lines of production C++17** — zero compiler warnings with strict flags (`-Wall -Wextra -Wpedantic` / `/W4`)
 
 ---
 
@@ -290,9 +291,13 @@ When autopilot is enabled (✈ Auto), the engine automatically advances to the n
 - Timestamped snapshots build a usage history per fixture for maintenance planning
 - **Editable Serial Number, Rental ID, and Notes columns** — double-click to edit, values persist across sessions in the JSON database and are included in all CSV exports. Useful when the printed serial number doesn't match the RDM UID
 - **Serial and Rental ID columns in the RDM device tree** — hidden by default, right-click the header to enable them. Values are pulled from the Fixture Database
+- **Scan Mode** — barcode scanner workflow for assigning serial numbers to fixtures. Walks through every fixture without a serial, sends RDM Identify On (fixture blinks), places the cursor in the Serial field, and auto-advances when the scanner enters a value. Works with any USB barcode scanner that acts as a keyboard
+- **Import DB** — import serial numbers and rental/asset IDs from CSV or Excel (.xlsx) files exported from rental software (Rentman, d&b, or any custom export). Column mapping dialog with data preview, automatic CSV separator detection (comma, semicolon, tab), and a match report showing which fixtures were updated and which serial numbers had no match
+- **Manual fixture entries** — right-click the fixture table to add entries for non-RDM equipment. Manual entries use a synthetic UID and allow editing the Manufacturer and Model columns directly
 - **Recording toggle** — pause and resume database writes without stopping RDM discovery; existing data is preserved
 - LED fixtures that don't support lamp hours no longer show misleading "0 hours" entries
 - CSV export for integration with external asset management and maintenance scheduling tools
+- **CSV auto-export** — point to an external CSV file that updates automatically every time the database changes, for live integration with inventory software on a shared drive or NAS
 - Database cleanup to clear fixtures from previous sessions or venues
 - Configurable minimum interval between snapshots to prevent redundant recordings
 
@@ -432,6 +437,7 @@ DMXRouter provides cross-platform virtual network adapter management for product
 - **VLAN 1 (Management / untagged)** is shown in the VLAN table on all platforms, representing the parent NIC. You can assign an IP to the parent NIC directly from the VLAN Manager.
 - **Set IP / Set DHCP** — assign a static IP or switch to DHCP from a single dialog, available in both the VLAN Manager and the Interfaces tab. The dialog detects the current mode (manual/DHCP) and pre-fills the current IP and subnet mask.
 - **IP addresses saved in profiles** — VLAN IPs are read from the OS at save time and stored in profiles and configs. When loading on a different machine, IPs are restored automatically after VLAN creation. On the same machine, IPs are only reassigned when they differ from the current OS configuration.
+- **Cross-platform profile portability** — VLAN profiles saved on Windows can be loaded on Mac/Linux and vice versa. The VLAN 1 management adapter is remapped to the local physical NIC automatically.
 - **Subnet Mask column** in the VLAN table for at-a-glance network configuration.
 - **Friendly interface names** — macOS shows networksetup service names ("Thunderbolt Ethernet"), Linux shows NetworkManager connection names ("Wired connection 1") instead of kernel device names.
 - WiFi adapters, VPN tunnels, TAP adapters, Bluetooth PAN, Docker bridges, and other non-Ethernet interfaces are filtered from the interface list. On Windows, adapter hardware descriptions are resolved via `GetAdaptersAddresses` to catch VPN/tunnel adapters that report as Ethernet.
@@ -610,8 +616,8 @@ Download and run `DMXRouter-Setup.exe`. All dependencies are included. UAC will 
 
 ### Linux
 Download the binary for your architecture from the [Releases](https://github.com/fiverecords/DMXRouter/releases) page:
-- `DMXRouter-v1.7.4-linux-x86_64.zip` — standard PCs and servers
-- `DMXRouter-v1.7.4-linux-arm64.zip` — Raspberry Pi 4/5, Orange Pi, and other ARM64 boards
+- `DMXRouter-v1.7.6-linux-x86_64.zip` — standard PCs and servers
+- `DMXRouter-v1.7.6-linux-arm64.zip` — Raspberry Pi 4/5, Orange Pi, and other ARM64 boards
 
 Qt6 runtime libraries are required:
 
@@ -683,4 +689,4 @@ This application uses **Qt 6**, licensed under the LGPL v3. Qt is dynamically li
 
 ---
 
-*DMXRouter v1.7.5 — Built for the stage.*
+*DMXRouter v1.7.6 — Built for the stage.*
