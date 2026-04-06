@@ -621,8 +621,8 @@ Download and run `DMXRouter-Setup.exe`. All dependencies are included. UAC will 
 
 ### Linux
 Download the binary for your architecture from the [Releases](https://github.com/fiverecords/DMXRouter/releases) page:
-- `DMXRouter-v1.7.7-linux-x86_64.zip` — standard PCs and servers
-- `DMXRouter-v1.7.7-linux-arm64.zip` — Raspberry Pi 4/5, Orange Pi, and other ARM64 boards
+- `DMXRouter-v1.7.8-linux-x86_64.zip` — standard PCs and servers
+- `DMXRouter-v1.7.8-linux-arm64.zip` — Raspberry Pi 4/5, Orange Pi, and other ARM64 boards
 
 Qt6 runtime libraries are required:
 
@@ -694,4 +694,4 @@ This application uses **Qt 6**, licensed under the LGPL v3. Qt is dynamically li
 
 ---
 
-*DMXRouter v1.7.7 — Built for the stage.*
+*DMXRouter v1.7.8 — Built for the stage.*
