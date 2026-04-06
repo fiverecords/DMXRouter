@@ -37,9 +37,9 @@ DMXRouter is a high-performance, cross-platform application written in C++ with 
 - **Engine groups** — organize process engines into collapsible, color-coded groups with drag-free reordering (Move Up/Down), tristate enable/disable, custom display order, and full profile persistence. Groups appear above ungrouped engines like folders before files
 - **Profile manager** — save and recall complete configurations, profile preview before loading, preserve IP/VLAN option on recall, import/export profiles between machines, optional startup profile auto-load. VLAN restore automatically scans the OS, imports existing adapters, creates missing ones (including vSwitch infrastructure on Windows), and applies saved IP addresses — with adapter selection dialog when multiple NICs are available
 - **Update checker** — automatic new version detection via GitHub Releases, with persistent status bar button and per-version dismiss
-- **Web remote control** — built-in HTTP + WebSocket server with a responsive web interface. Control playback, manage engines, operate RDM devices, and monitor stats from any phone, tablet, or browser on the network. Optional PIN authentication, PWA support (add to home screen), zero external dependencies
+- **Web remote control** — built-in HTTP + WebSocket server with a responsive web interface. Full engine management, RDM device configuration, universe monitor with live DMX grid, per-universe stats, show control, and profile management from any phone, tablet, or browser on the network. Optional PIN authentication, PWA support (add to home screen), keyboard shortcuts, zero external dependencies
 - **Cross-platform** — identical look and feel on Windows, Linux (x86-64 and ARM64), and macOS from a single codebase
-- **~61,200 lines of production C++17** — zero compiler warnings with strict flags (`-Wall -Wextra -Wpedantic` / `/W4`)
+- **~62,200 lines of production C++17** — zero compiler warnings with strict flags (`-Wall -Wextra -Wpedantic` / `/W4`)
 
 ---
 
@@ -253,7 +253,7 @@ When autopilot is enabled (✈ Auto), the engine automatically advances to the n
 ### RDM — ANSI E1.20
 - Discover devices on any Art-Net universe (ArtRdm packets)
 - Identify, set DMX start address, device label, and personality
-- **Identify management** — visual 💡 indicator and amber highlight in the device tree on identify, dedicated Identify Off button in the Config tab, right-click context menu (Identify On / Off), and an **All Identify Off** panic button in the header bar that sends Identify Off to every discovered fixture
+- **Identify management** — visual 💡 indicator and amber highlight in the device tree on identify, quick-access **Identify toggle** and **All Off** panic button in the tree toolbar (no need to switch tabs), dedicated Identify Off button in the Config tab, right-click context menu (Identify On / Off). The identify icon does not affect alphabetical sort order in the device tree
 - Read 19+ PIDs: device info, manufacturer, model, personality list, DMX address, identify state, sensor definitions and values, lamp state, lamp on mode, product detail, supported parameters, and more
 - PID Browser for raw GET/SET of any standard or manufacturer-specific parameter
 - 3-second transaction timeout with automatic retry (up to 2 retries per transaction)
@@ -267,7 +267,7 @@ When autopilot is enabled (✈ Auto), the engine automatically advances to the n
 - **Status message indicators** — the Status column shows ⚠ (red/orange) or ℹ (green) when a device has reported errors, warnings, or advisories via status messages. Tooltip shows the count breakdown
 - **Automatic status message drain** — when any RDM response has `messageCount > 0`, DMXRouter automatically drains the device output queue via GET QUEUED_MESSAGE. Status messages are accumulated per device and displayed in the tree and Status tab without manual polling
 - **Self-test workflow** — discover available self-tests via SELF_TEST_DESCRIPTION, trigger any test via PERFORM_SELFTEST from a dropdown in the Status tab, and monitor completion with automatic polling. Test results arrive as status messages via the auto-drain and appear in the status table and tree indicators
-- **Batch operations** — multi-select devices in the tree (Ctrl+click / Shift+click) and right-click: Identify All On/Off, Set Personality on all selected, Set Sequential Addresses (auto-increments by footprint), Fetch Info for all at once
+- **Batch operations** — multi-select devices in the tree (Ctrl+click / Shift+click) and right-click: Identify All On/Off, Set Personality on all selected, Set Sequential Addresses (auto-increments by footprint), Set Same Address (all selected get the same address — useful for testing or warehouse patching), Fetch Info for all at once
 - **Sensor progress bars** — graphical bars in the Sensors tab with color coding: green within normal range, orange outside. Fallback to plain numbers when no range is defined
 - **Preset scenes** — dedicated Presets tab for fixtures with internal scene storage (E1.37-1). Reads PRESET_INFO capabilities, fetches all scenes via PRESET_STATUS with sequential paced queries, displays fade up/down and wait times in an editable table (inline spinboxes for "Programmed" scenes, read-only for factory presets). Playback controls (Go/Off with scene selector), merge mode combo (Default/HTP/LTP/DMX Only), Capture to Scene, and Clear Scene — all without leaving the tab
 - **DMX address overlap warning** — fixtures on the same port with overlapping channel ranges are highlighted in red with a conflict tooltip
@@ -278,11 +278,14 @@ When autopilot is enabled (✈ Auto), the engine automatically advances to the n
 
 ### Fixture Templates
 - Save a device's configuration (DMX address, personality, label, and parameters) as a reusable template keyed by manufacturer and model ID
+- **Personality offline editing** — all available modes are cached in the template at save time. Change the personality in the template table or settings dialog even when the fixture is offline — no need to rediscover
 - **DMX address per model** — each template stores an optional DMX start address, editable directly in the template table. A global toggle — *Apply DMX address when using templates* — controls whether the address is sent to devices, making it easy to keep addresses configured but only activate them when needed (e.g., warehouse testing where every fixture of a model should start on the same channel)
 - **Lamp hours limit per model** — set a warning threshold in the template table. When a discovered device exceeds this value, the device name turns orange in the tree and the Info tab highlights the lamp hours in red
+- **Device hours limit per model** — same concept for LED fixtures that don't report lamp hours. Set a device hours threshold and get the same orange/red warnings when a fixture exceeds its service interval
 - **Firmware mismatch warning** — templates capture the firmware version at save time. When applying to a device running different firmware, a warning dialog explains that personalities or behavior may have changed. Auto-apply logs mismatches to the transaction log. The template table shows the Model column in orange when a discovered device has a different firmware
 - **Auto-apply on discovery** — newly discovered devices matching a saved manufacturer/model pair receive their template configuration automatically, enabling hands-free commissioning of replacement fixtures
-- **Alert identify** — optional toggle that automatically puts fixtures into RDM Identify mode when a firmware mismatch or lamp hours limit is detected. The fixture flashes on the rig so the technician can locate it without checking the screen — useful for pre-show checks in large installations
+- **Alert identify** — optional toggle that automatically puts fixtures into RDM Identify mode when a firmware mismatch or lamp/device hours limit is detected. The fixture flashes on the rig so the technician can locate it without checking the screen — useful for pre-show checks in large installations
+- **Fetch All** — one-click button in the header bar to fetch extended info (personalities, sensors, operating hours) for every discovered device at once, with progress bar and cancel support. No need to click each fixture individually
 - Templates stored as JSON and persist between sessions
 - Manual apply available for selective deployment from the Templates tab
 
@@ -302,7 +305,7 @@ When autopilot is enabled (✈ Auto), the engine automatically advances to the n
 - Configurable minimum interval between snapshots to prevent redundant recordings
 
 ### RDMNet — ANSI E1.33 / LLRP
-- **LLRP discovery** — multicast probe on 239.255.250.133 and 239.255.250.134 with interface-specific binding and TTL=1 (link-local). Interface selection is mandatory — no "All Interfaces" mode to prevent accidental multicast leakage
+- **LLRP discovery** — multicast probe on 239.255.250.133 and 239.255.250.134 with interface-specific binding and TTL=1 (link-local). Interface selection is mandatory — no "All Interfaces" mode to prevent accidental multicast leakage. Interface dropdown refreshes automatically when VLANs are created/removed or cables are plugged in, and filters out system adapters (Hyper-V Default Switch). Manual Refresh button also available
 - **RDM over LLRP** — send RDM commands to LLRP targets without an Art-Net path. Auto-fetches device info and network configuration on target select (no half-duplex bottleneck). Queries SUPPORTED_PARAMETERS first to avoid sending unsupported PIDs
 - **LLRP network recovery (E1.37-2)** — read and set static IP, subnet mask, gateway, and DHCP mode on any LLRP target. Fields pre-fill from the device's current configuration. DHCP toggle visually disables static fields. Staged re-read after apply catches DHCP lease assignments. Confirmation dialog warns before applying changes that could make the device unreachable
 - **Identify management** — identify icon and amber row highlighting in the LLRP target table, matching the RDM device tree visual style. Identify state is cached per target and synced to the toggle button on select
@@ -480,6 +483,7 @@ The **📊 Monitor** tab provides a real-time view of all DMX data flowing throu
 - **Absolute universe display** — Art-Net universes show `0.1.0 (17)` with 1-based absolute numbering
 - **Active channel count** — shows how many channels are above zero
 - **Channel history** — click any channel to open the oscilloscope waveform view
+- **Source name display** — shows the sender's name next to each universe in the list. sACN sources display their Source Name (E1.31 bytes 44–107, cached per CID); Art-Net sources display the Short Name from the most recent ArtPollReply, falling back to the sender's IP address when no ArtPollReply has been received. Example: `⬇ sACN 1 [VLAN 200] "My Console" ● 42ch`
 - **VLAN-friendly naming** — long adapter names like `DMXRouter_VLAN200` are automatically abbreviated to `VLAN 200` for readability
 - **sACN monitor range** — configurable in the Monitor tab toolbar (default: 1024 universes). Controls how many sACN multicast groups are joined automatically. Increase for large pixel-mapping or media server setups; universes beyond the range are still received if referenced by a process engine input
 
@@ -555,11 +559,12 @@ The server starts automatically on launch and listens on **port 9090** (HTTP) an
 
 The web interface is a responsive single-page application embedded in the binary — no external files, no CDN, no build step. Dark professional theme matching the desktop application. Sidebar navigation on desktop (≥768px), bottom tab bar on mobile.
 
-- **Playback** — full show management with all 9 transport controls (⏮️ Prev, ◀️ GoBack, ⏹️ Stop, Next ⏭️, GO, ▶️ Play / ⏸️ Pause, ◉ Take Snapshot, ⏺️ Rec, ✈️ Autopilot), cue list with inline editing, preset cue highlight, live fade and sequence progress bars, playback state per cue
-- **Engines** — enable/disable toggles, snapshot/failsafe, channel patch editing, 512-channel DMX output grid with color-coded intensity and fullscreen mode, global blackout, Show Mode toggle
-- **RDM Devices** — device list grouped by gateway with DMX address range, Fixture ID, personality, probe progress, status indicators (✔/⚠/ℹ), and last seen time. DMX address conflicts highlighted in red. Inline SET for address, personality, and label
-- **Stats & Log** — live PPS, active universes, error count, per-interface breakdown, scrollable log with color-coded severity
-- **More** — profiles (full CRUD), interfaces and VLANs (combined view), discovered nodes, system info (version, platform, Qt, uptime)
+- **Playback** — full show management with all 9 transport controls (⏮️ Prev, ◀️ GoBack, ⏹️ Stop, Next ⏭️, GO, ▶️ Play / ⏸️ Pause, ◉ Take Snapshot, ⏺️ Rec, ✈️ Autopilot), cue list with inline editing, preset cue highlight, live fade and sequence progress bars, playback state per cue. Keyboard shortcut: spacebar = GO
+- **Engines** — create new engines (name, mode, input/output with protocol, universe, and interface selection), rename, delete with confirmation. Enable/disable toggles, snapshot/failsafe, channel patch editing, 512-channel DMX output grid with color-coded intensity and fullscreen mode, tap any cell for channel number. Global blackout, Show Mode toggle with sticky banner
+- **RDM Devices** — device list grouped by gateway with search/filter, DMX address range with conflict highlighting, Fixture ID, personality, probe progress, status indicators. Inline SET for address, personality, and label. Expandable detail panel: operating hours, Fixture ID set, Apply Template, and full device configuration (Pan/Tilt Invert, P/T Swap, Display Invert, Power State, Lamp On Mode). RDM sub-tabs: Devices (with count), Templates (with Apply All), Fixture Database (with search). Fetch All button in header, Identify and All Off buttons in tree toolbar
+- **Universe Monitor** — all active universes with protocol, direction, source name, priority, and active channel count. Auto-refreshing list (5s). Live DMX grid with 500ms polling and fullscreen mode. Tap any cell for channel number and value
+- **Stats & Log** — six metric cards (PPS In/Out, Universes, Errors, Seq Errors in red, Uptime). Per-interface and per-universe stats tables with sequence error highlighting. Reset Stats button. Event log with level filter (All / Warn+ / Errors)
+- **More** — profiles (load/save/rename/duplicate/delete), interfaces with single toggle button and refresh, VLANs with status dots and IP display, discovered nodes with universe list and last seen timestamps, RDM emulator profile management, remote control with blackout toggle, system info. Refresh buttons on all sub-pages
 
 ### Server Features
 
@@ -616,8 +621,8 @@ Download and run `DMXRouter-Setup.exe`. All dependencies are included. UAC will 
 
 ### Linux
 Download the binary for your architecture from the [Releases](https://github.com/fiverecords/DMXRouter/releases) page:
-- `DMXRouter-v1.7.6-linux-x86_64.zip` — standard PCs and servers
-- `DMXRouter-v1.7.6-linux-arm64.zip` — Raspberry Pi 4/5, Orange Pi, and other ARM64 boards
+- `DMXRouter-v1.7.7-linux-x86_64.zip` — standard PCs and servers
+- `DMXRouter-v1.7.7-linux-arm64.zip` — Raspberry Pi 4/5, Orange Pi, and other ARM64 boards
 
 Qt6 runtime libraries are required:
 
@@ -689,4 +694,4 @@ This application uses **Qt 6**, licensed under the LGPL v3. Qt is dynamically li
 
 ---
 
-*DMXRouter v1.7.6 — Built for the stage.*
+*DMXRouter v1.7.7 — Built for the stage.*
