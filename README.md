@@ -256,17 +256,21 @@ When autopilot is enabled (✈ Auto), the engine automatically advances to the n
 - Identify, set DMX start address, device label, and personality
 - **Identify management** — visual 💡 indicator and amber highlight in the device tree on identify, quick-access **Identify toggle** and **All Off** panic button in the tree toolbar (no need to switch tabs), dedicated Identify Off button in the Config tab, right-click context menu (Identify On / Off). The identify icon does not affect alphabetical sort order in the device tree
 - Read 19+ PIDs: device info, manufacturer, model, personality list, DMX address, identify state, sensor definitions and values, lamp state, lamp on mode, product detail, supported parameters, and more
-- PID Browser for raw GET/SET of any standard or manufacturer-specific parameter
+- PID Browser for raw GET/SET of any standard or manufacturer-specific parameter. Smart SET detects numeric PIDs with PARAMETER_DESCRIPTION and shows a value dialog with range instead of raw hex
+- **Auto-fetch on device selection** — selecting a device automatically reads all extended and advanced info (personalities, sensors, hours, boot software, language, presets). The Refresh button re-reads everything in one click. A progress bar shows loading status
+- **Manufacturer PIDs** — auto-read values on device selection. Right-click to GET or Set Value with a smart numeric dialog based on the PID's parameter description (type and range). Hex fallback for non-numeric types
+- **Absolute universe in device tree** — port items show both Net.Sub.Uni notation and the absolute universe number (1–32767). The Gateway label in the Info tab also displays the absolute universe
+- **Reorderable inspector tabs** — drag RDM sub-tabs (Info, Config, Slots, etc.) to customize the order. Layout is saved across sessions and reset via View > Reset Tab Layout
 - 3-second transaction timeout with automatic retry (up to 2 retries per transaction)
 - **Sequential probing** — fixtures are queried one at a time with 50 ms spacing, preventing gateway buffer overflow on cheap Art-Net nodes and cutting probe time from 9+ seconds to ~1.5 s on large rigs
-- **ACK_TIMER** — fixtures that need extra time (factory reset, firmware) are retried after their requested delay, preserving the original command class (GET or SET)
+- **ACK_TIMER** — fixtures that need extra time (personality change, factory reset, firmware) are retried after their requested delay. SET commands are verified with a GET per E1.20 §5.3.2; GET commands are re-sent with the original parameters
 - **ACK_OVERFLOW** — fixtures with 115+ supported PIDs that split responses across multiple packets are reassembled transparently
 - **Full UTF-8 support** — manufacturer, model, label, software version, personality names, slot names, and sensor names display correctly in Chinese, Korean, and other non-Latin scripts
 - Full device cache with parameter persistence
 - **Personality column** — "Pers" column in the device tree shows the current mode (e.g., `3/12`) at a glance
 - **Fixture ID column** — "FID" column shows the E1.37-5 DEVICE_UNIT_NUMBER next to the DMX address, with GET/SET support in the Config tab
 - **Status message indicators** — the Status column shows ⚠ (red/orange) or ℹ (green) when a device has reported errors, warnings, or advisories via status messages. Tooltip shows the count breakdown
-- **Automatic status message drain** — when any RDM response has `messageCount > 0`, DMXRouter automatically drains the device output queue via GET QUEUED_MESSAGE. Status messages are accumulated per device and displayed in the tree and Status tab without manual polling
+- **Automatic status message drain** — when any RDM response has `messageCount > 0`, DMXRouter automatically drains the device output queue via GET QUEUED_MESSAGE. Persistent-status devices (direct-read model) are detected by tracking messageCount across iterations and stop after two requests to avoid monopolizing the bus. Status messages are accumulated per device and displayed in the tree and Status tab without manual polling
 - **Self-test workflow** — discover available self-tests via SELF_TEST_DESCRIPTION, trigger any test via PERFORM_SELFTEST from a dropdown in the Status tab, and monitor completion with automatic polling. Test results arrive as status messages via the auto-drain and appear in the status table and tree indicators
 - **Batch operations** — multi-select devices in the tree (Ctrl+click / Shift+click) and right-click: Identify All On/Off, Set Personality on all selected, Set Sequential Addresses (auto-increments by footprint), Set Same Address (all selected get the same address — useful for testing or warehouse patching), Fetch Info for all at once. The Config tab also has **Seq** buttons for DMX Address (footprint-aware) and Fixture ID (increments by one), and the Identify toggle applies to all selected devices
 - **Sensor progress bars** — graphical bars in the Sensors tab with color coding: green within normal range, orange outside. Fallback to plain numbers when no range is defined
@@ -289,6 +293,7 @@ When autopilot is enabled (✈ Auto), the engine automatically advances to the n
 - **Fetch All** — one-click button in the header bar to fetch extended info (personalities, sensors, operating hours) for every discovered device at once, with progress bar and cancel support. No need to click each fixture individually
 - Templates stored as JSON and persist between sessions
 - Manual apply available for selective deployment from the Templates tab
+- **Station Sync** — bidirectional synchronization of templates and fixture database across multiple DMXRouter stations. New data on either side is exchanged automatically; template conflicts are detected by modification timestamp and resolved via an interactive dialog (Keep Local / Accept Remote / Skip). Fixture records merge automatically with the newer version winning. Configure a source station URL in the Templates or Fixture DB tab. Ideal for multi-station warehouse or venue installations where multiple machines manage the same fixture inventory
 
 ### Fixture Database
 - Track operating hours, lamp hours, and power cycles for every RDM device in the installation
@@ -496,12 +501,12 @@ The **📊 Monitor** tab provides a real-time view of all DMX data flowing throu
 ![Remote](docs/RemoteInput.png)
 
 ### Dockable Panels
-All panels (Interfaces, Engines, Monitor, Cues, Stats, Discovery, RDM, RDM Emulator, Broker, LLRP, Remote Control) can be **detached into floating windows** — double-click any tab or drag it out. Ideal for multi-monitor setups: put the Monitor on your FOH screen, Engines on the tech desk, RDM on a tablet. Closing a floating panel snaps it back into the main window — panels are never lost. Keyboard shortcuts work regardless of docked or floating state.
+All panels (Interfaces, Engines, Monitor, Cues, Stats, Discovery, RDM, RDM Emulator, Broker, LLRP, Remote Control) can be **reordered by dragging** and **detached into floating windows** — drag horizontally to reorder, drag vertically to float. Ideal for multi-monitor setups: put the Monitor on your FOH screen, Engines on the tech desk, RDM on a tablet. Closing a floating panel snaps it back into the main window — panels are never lost. Tab order and window position are saved across sessions. Use View > Reset Tab Layout to restore the default arrangement.
 
 ### Bulk Workflow Tools
 - **Reroute** — when a network interface changes IP, select the affected engines, click Reroute, and a From → To dialog swaps one interface for another across all selected engines at once (inputs, outputs, and control channels). Single-selection mode shows a per-slot detail view for fine-tuning.
 - **Rename with auto-increment** — select several engines, click Rename, enter a base name ending in a number (e.g., "Stage 1"), and they are named Stage 1, Stage 2, Stage 3 in selection order.
-- **Absolute universe field** — all control source panels (Remote Control, Show Cue, merge editor) include an Absolute field (Art-Net PA+1). Editing Absolute updates Net/Subnet/Universe and vice versa; switching between Art-Net and sACN preserves the universe address.
+- **Absolute universe field** — all control source panels (Remote Control, Show Cue, merge editor) include an Absolute field that combines Net/Subnet/Universe into a single number. Editing Absolute updates Net/Subnet/Universe and vice versa; switching between Art-Net and sACN preserves the universe address. A **View → Art-Net 0-based universe numbering** toggle switches between the traditional 1-based display (Art-Net 0.0.0 = Universe 1) and native 0-based display (Art-Net 0.0.0 = Universe 0) across all panels and the web interface.
 
 ### Cross-Platform Visual Consistency
 The interface looks identical on Windows, macOS, and Linux — same font (Inter), same colors, same spacing. Platform-specific adaptations happen under the hood:
@@ -623,8 +628,8 @@ Download and run `DMXRouter-Setup.exe`. All dependencies are included. UAC will 
 
 ### Linux
 Download the binary for your architecture from the [Releases](https://github.com/fiverecords/DMXRouter/releases) page:
-- `DMXRouter-v1.7.11-linux-x86_64.zip` — standard PCs and servers
-- `DMXRouter-v1.7.11-linux-arm64.zip` — Raspberry Pi 4/5, Orange Pi, and other ARM64 boards
+- `DMXRouter-v1.8.0-linux-x86_64.zip` — standard PCs and servers
+- `DMXRouter-v1.8.0-linux-arm64.zip` — Raspberry Pi 4/5, Orange Pi, and other ARM64 boards
 
 Qt6 runtime libraries are required:
 
@@ -696,4 +701,4 @@ This application uses **Qt 6**, licensed under the LGPL v3. Qt is dynamically li
 
 ---
 
-*DMXRouter v1.7.11 — Built for the stage.*
+*DMXRouter v1.8.0 — Built for the stage.*
