@@ -37,7 +37,7 @@ DMXRouter is a high-performance, cross-platform application written in C++ with 
 - **Engine groups** — organize process engines into collapsible, color-coded groups with drag-free reordering (Move Up/Down), tristate enable/disable, custom display order, and full profile persistence. Groups appear above ungrouped engines like folders before files
 - **Profile manager** — save and recall complete configurations, profile preview before loading, preserve IP/VLAN option on recall, import/export profiles between machines, optional startup profile auto-load. VLAN restore automatically scans the OS, imports existing adapters, creates missing ones (including vSwitch infrastructure on Windows), and applies saved IP addresses — with adapter selection dialog when multiple NICs are available
 - **Update checker** — automatic new version detection via GitHub Releases, with persistent status bar button and per-version dismiss
-- **Web remote control** — built-in HTTP + WebSocket server with a responsive web interface. Full engine management, RDM device configuration, universe monitor with live DMX grid, per-universe stats, show control, and profile management from any phone, tablet, or browser on the network. Optional PIN authentication, PWA support (add to home screen), keyboard shortcuts, zero external dependencies
+- **Web remote control** — built-in HTTP + WebSocket server with a responsive web interface. Full engine management (create, edit, delete, enable/disable, switch inputs), RDM device configuration, universe monitor with live DMX grid, per-universe stats, show control, and profile management from any phone, tablet, or browser on the network. Optional PIN authentication, PWA support (add to home screen), keyboard shortcuts, zero external dependencies
 - **Cross-platform** — identical look and feel on Windows, Linux (x86-64 and ARM64), and macOS from a single codebase
 - **~62,200 lines of production C++17** — zero compiler warnings with strict flags (`-Wall -Wextra -Wpedantic` / `/W4`)
 
@@ -259,7 +259,8 @@ When autopilot is enabled (✈ Auto), the engine automatically advances to the n
 - PID Browser for raw GET/SET of any standard or manufacturer-specific parameter. Smart SET detects numeric PIDs with PARAMETER_DESCRIPTION and shows a value dialog with range instead of raw hex
 - **Auto-fetch on device selection** — selecting a device automatically reads all extended and advanced info (personalities, sensors, hours, boot software, language, presets). The Refresh button re-reads everything in one click. A progress bar shows loading status
 - **Manufacturer PIDs** — auto-read values on device selection. Right-click to GET or Set Value with a smart numeric dialog based on the PID's parameter description (type and range). Hex fallback for non-numeric types
-- **Absolute universe in device tree** — port items show both Net.Sub.Uni notation and the absolute universe number (1–32767). The Gateway label in the Info tab also displays the absolute universe
+- **Absolute universe in device tree** — port items show both Net.Sub.Uni notation and the absolute universe number (1–32767). Ports configured as sACN display "sACN Universe X" instead of Art-Net notation. The Gateway label in the Info tab also displays the absolute universe and protocol
+- **Device Model ID** — the numeric DEVICE_MODEL_ID from DEVICE_INFO is displayed in hexadecimal in the Info tab, alongside the human-readable model name
 - **Reorderable inspector tabs** — drag RDM sub-tabs (Info, Config, Slots, etc.) to customize the order. Layout is saved across sessions and reset via View > Reset Tab Layout
 - 3-second transaction timeout with automatic retry (up to 2 retries per transaction)
 - **Sequential probing** — fixtures are queried one at a time with 50 ms spacing, preventing gateway buffer overflow on cheap Art-Net nodes and cutting probe time from 9+ seconds to ~1.5 s on large rigs
@@ -628,8 +629,8 @@ Download and run `DMXRouter-Setup.exe`. All dependencies are included. UAC will 
 
 ### Linux
 Download the binary for your architecture from the [Releases](https://github.com/fiverecords/DMXRouter/releases) page:
-- `DMXRouter-v1.8.0-linux-x86_64.zip` — standard PCs and servers
-- `DMXRouter-v1.8.0-linux-arm64.zip` — Raspberry Pi 4/5, Orange Pi, and other ARM64 boards
+- `DMXRouter-v1.8.1-linux-x86_64.zip` — standard PCs and servers
+- `DMXRouter-v1.8.1-linux-arm64.zip` — Raspberry Pi 4/5, Orange Pi, and other ARM64 boards
 
 Qt6 runtime libraries are required:
 
@@ -701,4 +702,4 @@ This application uses **Qt 6**, licensed under the LGPL v3. Qt is dynamically li
 
 ---
 
-*DMXRouter v1.8.0 — Built for the stage.*
+*DMXRouter v1.8.1 — Built for the stage.*
