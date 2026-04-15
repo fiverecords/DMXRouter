@@ -35,11 +35,11 @@ DMXRouter is a high-performance, cross-platform application written in C++ with 
 - **Universe monitor** — real-time DMX data and sACN priority viewer with per-interface filtering for multi-NIC environments
 - **Bulk workflow tools** — Reroute (swap interfaces across multiple engines at once), Rename with auto-increment, Uni −/+ quick universe adjust for all engine modes, Engine Templates for rapid setup, Absolute universe addressing across all panels
 - **Engine groups** — organize process engines into collapsible, color-coded groups with drag-free reordering (Move Up/Down), tristate enable/disable, custom display order, and full profile persistence. Groups appear above ungrouped engines like folders before files
-- **Profile manager** — save and recall complete configurations, profile preview before loading, preserve IP/VLAN option on recall, import/export profiles between machines, optional startup profile auto-load. VLAN restore automatically scans the OS, imports existing adapters, creates missing ones (including vSwitch infrastructure on Windows), and applies saved IP addresses — with adapter selection dialog when multiple NICs are available
+- **Profile manager** — save and recall complete configurations, profile preview before loading, preserve IP/VLAN option on recall, import/export profiles between machines, optional startup profile auto-load, periodic auto-save with crash recovery dialog on startup. VLAN restore automatically scans the OS, imports existing adapters, creates missing ones (including vSwitch infrastructure on Windows), and applies saved IP addresses — with adapter selection dialog when multiple NICs are available
 - **Update checker** — automatic new version detection via GitHub Releases, with persistent status bar button and per-version dismiss
-- **Web remote control** — built-in HTTP + WebSocket server with a responsive web interface. Full engine management (create, edit, delete, enable/disable, switch inputs), RDM device configuration, universe monitor with live DMX grid, per-universe stats, show control, and profile management from any phone, tablet, or browser on the network. Optional PIN authentication, PWA support (add to home screen), keyboard shortcuts, zero external dependencies
+- **Web remote control** — built-in HTTP + WebSocket server with a responsive web interface. Full engine management (create, edit, delete, enable/disable, switch inputs), RDM device configuration, LLRP discovery and network recovery (E1.37-2), VLAN management, IP editor, universe monitor with live DMX grid, per-universe stats, show control, and profile management from any phone, tablet, or browser on the network. Optional PIN authentication, PWA support (add to home screen), keyboard shortcuts, zero external dependencies
 - **Cross-platform** — identical look and feel on Windows, Linux (x86-64 and ARM64), and macOS from a single codebase
-- **~62,200 lines of production C++17** — zero compiler warnings with strict flags (`-Wall -Wextra -Wpedantic` / `/W4`)
+- **~67,400 lines of production C++17** — zero compiler warnings with strict flags (`-Wall -Wextra -Wpedantic` / `/W4`)
 
 ---
 
@@ -629,8 +629,8 @@ Download and run `DMXRouter-Setup.exe`. All dependencies are included. UAC will 
 
 ### Linux
 Download the binary for your architecture from the [Releases](https://github.com/fiverecords/DMXRouter/releases) page:
-- `DMXRouter-v1.8.1-linux-x86_64.zip` — standard PCs and servers
-- `DMXRouter-v1.8.1-linux-arm64.zip` — Raspberry Pi 4/5, Orange Pi, and other ARM64 boards
+- `DMXRouter-v1.8.2-linux-x86_64.zip` — standard PCs and servers
+- `DMXRouter-v1.8.2-linux-arm64.zip` — Raspberry Pi 4/5, Orange Pi, and other ARM64 boards
 
 Qt6 runtime libraries are required:
 
@@ -702,4 +702,4 @@ This application uses **Qt 6**, licensed under the LGPL v3. Qt is dynamically li
 
 ---
 
-*DMXRouter v1.8.1 — Built for the stage.*
+*DMXRouter v1.8.2 — Built for the stage.*
