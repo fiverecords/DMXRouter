@@ -38,8 +38,9 @@ DMXRouter is a high-performance, cross-platform application written in C++ with 
 - **Profile manager** — save and recall complete configurations, profile preview before loading, preserve IP/VLAN option on recall, import/export profiles between machines, optional startup profile auto-load, periodic auto-save with crash recovery dialog on startup. VLAN restore automatically scans the OS, imports existing adapters, creates missing ones (including vSwitch infrastructure on Windows), and applies saved IP addresses — with adapter selection dialog when multiple NICs are available
 - **Update checker** — automatic new version detection via GitHub Releases, with persistent status bar button and per-version dismiss
 - **Web remote control** — built-in HTTP + WebSocket server with a responsive web interface. Full engine management (create, edit, delete, enable/disable, switch inputs), RDM device configuration, LLRP discovery and network recovery (E1.37-2), VLAN management, IP editor, universe monitor with live DMX grid, per-universe stats, show control, and profile management from any phone, tablet, or browser on the network. Optional PIN authentication, PWA support (add to home screen), keyboard shortcuts, zero external dependencies
+- **Fixture Check** — commissioning dock for walking through an imported rig fixture-by-fixture. Import `.mvr` files from MA3, Capture, Vectorworks, WYSIWYG and others; match placeholders to real GDTF profiles via built-in gdtf-share.com client; control fixtures with semantic sliders (Pan/Tilt/Color/Gobo/…), Home/Highlight/Release, multi-fixture broadcast, named channel ranges with wheel thumbnails, multi-cell LED wall support. Integrates with RDM: right-click any discovered device to inject it into the patch even without an MVR
 - **Cross-platform** — identical look and feel on Windows, Linux (x86-64 and ARM64), and macOS from a single codebase
-- **~67,400 lines of production C++17** — zero compiler warnings with strict flags (`-Wall -Wextra -Wpedantic` / `/W4`)
+- **~78,100 lines of production C++17** — zero compiler warnings with strict flags (`-Wall -Wextra -Wpedantic` / `/W4`)
 
 ---
 
@@ -52,6 +53,7 @@ DMXRouter is a high-performance, cross-platform application written in C++ with 
 - [Show Cue System](#show-cue-system)
 - [RDM & RDMNet](#rdm--rdmnet)
 - [RDM Device Emulator](#rdm-device-emulator)
+- [Fixture Check](#fixture-check)
 - [Channel Patching](#channel-patching)
 - [Channel History](#channel-history)
 - [Network Discovery](#network-discovery)
@@ -368,6 +370,48 @@ Click **✎ Edit** or use the right-click context menu to modify any profile —
 
 ---
 
+## Fixture Check
+
+Commissioning tool for walking through an imported rig fixture-by-fixture, taking individual control to verify position, function, and wiring before a show. Import an MVR from your lighting design application (MA3, Capture, Vectorworks, WYSIWYG), and DMXRouter presents the full patch with a slider panel for every fixture.
+
+### Capabilities
+
+- **MVR import** — parses `.mvr` archives (MVR 1.0–1.6) with their embedded GDTF definitions. Understands multi-break fixtures, nested layers, and generic placeholder GDTFs (channel-count-only definitions exported by Capture, WYSIWYG and other design tools). Break numbering automatically reconciled between MVR (0-based) and GDTF (1-based) for single-break fixtures
+- **Semantic channel control** — when the GDTF provides real attribute data, sliders are labelled with the actual parameter names (Dim, Pan, Tilt, ColorSub_C, Gobo1Pos, Prism1Pos, Zoom, Focus, …) rather than anonymous Ch1..ChN. Full GDTF 1.2 specification support including 8/16/24/32-bit channels, Default and Highlight attributes at both DMXChannel and ChannelFunction level
+- **Home** — sends each fixture's GDTF-declared default values (Pan/Tilt centred, color open, gobo open, etc.)
+- **Highlight** — sends the "full output" values for quick visual identification: beam open, full intensity, position centred
+- **Release / Fade Out** — restores the fixture to the live console's output, either instantly (Release) or crossfading against the live merge result over 0.5s–5s (Fade Out)
+- **Release All** — panic button to release every overridden fixture simultaneously
+- **Next / Previous** — walk through the rig in patch order; selection syncs bidirectionally with the Patch tree
+- **On-demand output** — when you take control of a fixture on a universe that has no incoming desk data, DMXRouter starts emitting that universe automatically so the rig actually receives your overrides. When you release the fixture, emission stops — no continuous traffic when nothing is being controlled. The Universe Monitor reflects every byte that leaves the application, whether it originated from a desk merge or from Fixture Check
+- **GDTF Library Resolver** — upgrades generic placeholder fixtures with real semantic GDTFs pulled from `~/Documents/DMXRouter/GDTF/`. Matches by FixtureTypeID UUID primarily, falls back to Manufacturer+Name for GDTFs missing UUID. Mode-mismatch policy: if the upgrade GDTF lacks the placeholder's mode, the placeholder is kept unchanged (safe default — no silent personality swap)
+- **GDTF Share online integration** — built-in client for [gdtf-share.com](https://gdtf-share.com), the official ESTA GDTF library. `File → Browse GDTF Share...` opens a searchable catalog of every public fixture profile; `File → Download Missing GDTFs from Share...` reads the UUIDs of the current patch's placeholders and pre-selects matching entries for one-click download. Credentials are stored locally (lightly obfuscated) so the login prompt appears at most once per machine
+- **Import GDTF Files** — `File → Import GDTF Files...` copies one or more `.gdtf` into the library folder and triggers an automatic rescan
+- **RDM → Fixture Check** — right-click any RDM-discovered device (or a multi-selection) in the RDM panel and choose "Send to Fixture Check". DMXRouter matches the device against the current patch first (avoiding duplicates), then against the local GDTF library, then synthesizes a FixtureType from RDM `SLOT_INFO` / `SLOT_DESCRIPTION` data — giving you semantic Pan/Tilt/Dim/Color sliders even without any MVR loaded. The injected entries are tagged `[RDM]` in the Patch tree and can be cleared in one click via `File → Remove RDM-discovered Fixtures`
+- **Multi-fixture selection** — Ctrl+click or Shift+click in the Patch tree to select several fixtures at once. Same-type selections get the full slider set and broadcast control; mixed-type selections show only the attributes common to all (typically Dim/Pan/Tilt), so you can check basic movement across the whole rig in one pass. Home All / Highlight All buttons act on every fixture in the patch regardless of selection — useful as the first action of a check session to put the rig in a known state
+- **Named channel ranges with wheel thumbnails** — channels with discrete GDTF `<ChannelSet>` positions (gobo, colour, prism, effect, shutter macros) show a combobox with named options and small thumbnails of the actual gobo pattern or colour sample, extracted from the fixture's `.gdtf` archive. The raw slider stays alongside so you can still dial into the middle of a range (shake speed, rainbow spin rate, etc.), and the two stay in sync bidirectionally
+- **Multi-cell fixture support** — LED walls, pixel matrices, and any GDTF that uses `<GeometryReference>` to replicate a channel template across physical positions are expanded into a parent container + N cell sub-fixtures. Each cell is individually addressable and selectable in the patch tree. Selecting the container broadcasts slider moves and Home/Highlight/Release to all cells at once, while selecting a single cell controls just that one — the common "set everything identically" case and the precision "check pixel 47" case are both one click away
+- **Session-scoped overrides** — active overrides are not saved across restart; the MVR patch itself is saved in the configuration
+
+### How override reaches the physical fixture
+
+The control flow is layered so Fixture Check never duplicates transport logic — it plugs into the existing engine pipeline:
+
+1. **MVR provides address** — each fixture in the imported MVR carries a DMX address (`Universe / Channel`). This is a logical address (e.g. `U5/357`), not tied to any interface
+2. **Override Layer records the intent** — moving a slider or clicking Home/Highlight stores `{fixtureId → {universe, channel, value}}` in an in-memory map. The override layer knows nothing about interfaces, protocols, or merge modes
+3. **Merge Engine applies overrides before transmit** — for every configured engine output, the merge engine asks the override layer "do you have overrides for this universe?" and if yes, stamps them onto the outgoing DMX buffer after merge and before the transport layer sees it. Single-byte overhead when no overrides are active (atomic flag early-out)
+4. **On-demand activation for idle universes** — when overrides appear on a universe that has no incoming desk data, the merge engine automatically starts synthesising zero-based packets at ~30 Hz so the override layer has something to stamp on. Both transport and Universe Monitor see the real bytes leaving the application. When the last override on that universe is released, emission stops — no continuous traffic when nothing is being driven
+5. **Transport delivers via configured interfaces** — the Engines panel is where you map `universe → interface(s) + protocol`. The override is inherently replicated to every interface/protocol your engine configuration says should receive that universe
+
+> **Required setup for a fixture to actually move:** the Engines panel must have at least one engine output configured for the universe the MVR assigned to the fixture. Without an engine emitting that universe, the overrides are computed correctly but have no transport to ride on. Fixture Check reuses the transport stack rather than replicating it, so VLANs, merge priorities, sACN per-channel priority, and rate limiting all apply consistently
+
+### Tips
+
+- Use the Resolve with GDTF Library button after importing a Capture-exported MVR to upgrade the generic channel numbers into meaningful attribute names before walking the rig
+- The Fixture Check panel is a single dock with the patch tree (left) and sliders (right) separated by a draggable divider — collapse either side when you want to focus on navigation or control
+
+---
+
 ## Channel Patching
 
 Full channel-level remapping applied after merge and before output.
@@ -629,8 +673,8 @@ Download and run `DMXRouter-Setup.exe`. All dependencies are included. UAC will 
 
 ### Linux
 Download the binary for your architecture from the [Releases](https://github.com/fiverecords/DMXRouter/releases) page:
-- `DMXRouter-v1.8.2-linux-x86_64.zip` — standard PCs and servers
-- `DMXRouter-v1.8.2-linux-arm64.zip` — Raspberry Pi 4/5, Orange Pi, and other ARM64 boards
+- `DMXRouter-v1.9.0-linux-x86_64.zip` — standard PCs and servers
+- `DMXRouter-v1.9.0-linux-arm64.zip` — Raspberry Pi 4/5, Orange Pi, and other ARM64 boards
 
 Qt6 runtime libraries are required:
 
@@ -702,4 +746,4 @@ This application uses **Qt 6**, licensed under the LGPL v3. Qt is dynamically li
 
 ---
 
-*DMXRouter v1.8.2 — Built for the stage.*
+*DMXRouter v1.9.0 — Built for the stage.*
