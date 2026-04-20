@@ -381,7 +381,7 @@ Commissioning tool for walking through an imported rig fixture-by-fixture, takin
 - **Home** — sends each fixture's GDTF-declared default values (Pan/Tilt centred, color open, gobo open, etc.)
 - **Highlight** — sends the "full output" values for quick visual identification: beam open, full intensity, position centred
 - **Release / Fade Out** — restores the fixture to the live console's output, either instantly (Release) or crossfading against the live merge result over 0.5s–5s (Fade Out)
-- **Release All** — panic button to release every overridden fixture simultaneously
+- **Release All** — panic button to release every overridden fixture simultaneously. Available both in the Fixture Check dock and as a global toolbar button next to Show Mode, with a live count so you can see how many fixtures are currently under manual control from any tab
 - **Next / Previous** — walk through the rig in patch order; selection syncs bidirectionally with the Patch tree
 - **On-demand output** — when you take control of a fixture on a universe that has no incoming desk data, DMXRouter starts emitting that universe automatically so the rig actually receives your overrides. When you release the fixture, emission stops — no continuous traffic when nothing is being controlled. The Universe Monitor reflects every byte that leaves the application, whether it originated from a desk merge or from Fixture Check
 - **GDTF Library Resolver** — upgrades generic placeholder fixtures with real semantic GDTFs pulled from `~/Documents/DMXRouter/GDTF/`. Matches by FixtureTypeID UUID primarily, falls back to Manufacturer+Name for GDTFs missing UUID. Mode-mismatch policy: if the upgrade GDTF lacks the placeholder's mode, the placeholder is kept unchanged (safe default — no silent personality swap)
@@ -392,6 +392,7 @@ Commissioning tool for walking through an imported rig fixture-by-fixture, takin
 - **Named channel ranges with wheel thumbnails** — channels with discrete GDTF `<ChannelSet>` positions (gobo, colour, prism, effect, shutter macros) show a combobox with named options and small thumbnails of the actual gobo pattern or colour sample, extracted from the fixture's `.gdtf` archive. The raw slider stays alongside so you can still dial into the middle of a range (shake speed, rainbow spin rate, etc.), and the two stay in sync bidirectionally
 - **Multi-cell fixture support** — LED walls, pixel matrices, and any GDTF that uses `<GeometryReference>` to replicate a channel template across physical positions are expanded into a parent container + N cell sub-fixtures. Each cell is individually addressable and selectable in the patch tree. Selecting the container broadcasts slider moves and Home/Highlight/Release to all cells at once, while selecting a single cell controls just that one — the common "set everything identically" case and the precision "check pixel 47" case are both one click away
 - **Session-scoped overrides** — active overrides are not saved across restart; the MVR patch itself is saved in the configuration
+- **Visible override state** — the Fixture Patch toolbar shows a live "● N fixture(s) overridden" badge in orange when any fixture is under manual control, and overridden rows in the tree get a subtle green tint across every column plus a bold green FID so they're impossible to miss from any part of the rig
 
 ### How override reaches the physical fixture
 
@@ -673,8 +674,8 @@ Download and run `DMXRouter-Setup.exe`. All dependencies are included. UAC will 
 
 ### Linux
 Download the binary for your architecture from the [Releases](https://github.com/fiverecords/DMXRouter/releases) page:
-- `DMXRouter-v1.9.0-linux-x86_64.zip` — standard PCs and servers
-- `DMXRouter-v1.9.0-linux-arm64.zip` — Raspberry Pi 4/5, Orange Pi, and other ARM64 boards
+- `DMXRouter-v1.9.1-linux-x86_64.zip` — standard PCs and servers
+- `DMXRouter-v1.9.1-linux-arm64.zip` — Raspberry Pi 4/5, Orange Pi, and other ARM64 boards
 
 Qt6 runtime libraries are required:
 
@@ -746,4 +747,4 @@ This application uses **Qt 6**, licensed under the LGPL v3. Qt is dynamically li
 
 ---
 
-*DMXRouter v1.9.0 — Built for the stage.*
+*DMXRouter v1.9.1 — Built for the stage.*
