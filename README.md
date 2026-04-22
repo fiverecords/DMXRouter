@@ -37,7 +37,7 @@ DMXRouter is a high-performance, cross-platform application written in C++ with 
 - **Engine groups** — organize process engines into collapsible, color-coded groups with drag-free reordering (Move Up/Down), tristate enable/disable, custom display order, and full profile persistence. Groups appear above ungrouped engines like folders before files
 - **Profile manager** — save and recall complete configurations, profile preview before loading, preserve IP/VLAN option on recall, import/export profiles between machines, optional startup profile auto-load, periodic auto-save with crash recovery dialog on startup. VLAN restore automatically scans the OS, imports existing adapters, creates missing ones (including vSwitch infrastructure on Windows), and applies saved IP addresses — with adapter selection dialog when multiple NICs are available
 - **Update checker** — automatic new version detection via GitHub Releases, with persistent status bar button and per-version dismiss
-- **Web remote control** — built-in HTTP + WebSocket server with a responsive web interface. Full engine management (create, edit, delete, enable/disable, switch inputs), RDM device configuration, LLRP discovery and network recovery (E1.37-2), VLAN management, IP editor, universe monitor with live DMX grid, per-universe stats, show control, and profile management from any phone, tablet, or browser on the network. Optional PIN authentication, PWA support (add to home screen), keyboard shortcuts, zero external dependencies
+- **Web remote control** — built-in HTTP + WebSocket server with a responsive web interface. Full engine management (create, edit, delete, enable/disable, switch inputs), Fixture Check panel for live commissioning from a tablet (semantic sliders, Highlight, walk-the-rig, RDM cross-reference), RDM device configuration, LLRP discovery and network recovery (E1.37-2), VLAN management, IP editor, universe monitor with live DMX grid, per-universe stats, show control, and profile management from any phone, tablet, or browser on the network. Optional PIN authentication, PWA support (add to home screen), keyboard shortcuts, zero external dependencies
 - **Fixture Check** — commissioning dock for walking through an imported rig fixture-by-fixture. Import `.mvr` files from MA3, Capture, Vectorworks, WYSIWYG and others; match placeholders to real GDTF profiles via built-in gdtf-share.com client; control fixtures with semantic sliders (Pan/Tilt/Color/Gobo/…), Home/Highlight/Release, multi-fixture broadcast, named channel ranges with wheel thumbnails, multi-cell LED wall support. Integrates with RDM: right-click any discovered device to inject it into the patch even without an MVR
 - **Cross-platform** — identical look and feel on Windows, Linux (x86-64 and ARM64), and macOS from a single codebase
 - **~78,100 lines of production C++17** — zero compiler warnings with strict flags (`-Wall -Wextra -Wpedantic` / `/W4`)
@@ -618,6 +618,7 @@ The web interface is a responsive single-page application embedded in the binary
 
 - **Playback** — full show management with all 9 transport controls (⏮️ Prev, ◀️ GoBack, ⏹️ Stop, Next ⏭️, GO, ▶️ Play / ⏸️ Pause, ◉ Take Snapshot, ⏺️ Rec, ✈️ Autopilot), cue list with inline editing, preset cue highlight, live fade and sequence progress bars, playback state per cue. Keyboard shortcut: spacebar = GO
 - **Engines** — create new engines (name, mode, input/output with protocol, universe, and interface selection), rename, delete with confirmation. Enable/disable toggles, snapshot/failsafe, channel patch editing, 512-channel DMX output grid with color-coded intensity and fullscreen mode, tap any cell for channel number. Global blackout, Show Mode toggle with sticky banner
+- **Fixture Check** — full commissioning parity with the desktop's Fixture Check dock from a phone or tablet. The patch is grouped by MVR layer with collapsible headers (collapsed state survives reloads). Tap any fixture to open its detail panel with Home, Highlight, Release, semantic sliders, and ChannelSet combos for gobos / colour macros / strobe modes. Walk-the-rig with Prev / Next, propagating Highlight as you step. "Check RDM" header button opens a full-screen cross-reference dialog (Missing / Wrong Type / Wrong Personality / Via Cells / OK / Unknown counters, severity-sorted rows, tap-to-jump). "Release All" panic button in the header — no confirmation modal, one tap, instant. Live two-way sync with the desktop via WebSocket
 - **RDM Devices** — device list grouped by gateway with search/filter, DMX address range with conflict highlighting, Fixture ID, personality, probe progress, status indicators. Inline SET for address, personality, and label. Expandable detail panel: operating hours, Fixture ID set, Apply Template, and full device configuration (Pan/Tilt Invert, P/T Swap, Display Invert, Power State, Lamp On Mode). RDM sub-tabs: Devices (with count), Templates (with Apply All), Fixture Database (with search). Fetch All button in header, Identify and All Off buttons in tree toolbar
 - **Universe Monitor** — all active universes with protocol, direction, source name, priority, and active channel count. Auto-refreshing list (5s). Live DMX grid with real-time WebSocket push at 20 fps (automatic HTTP fallback) and fullscreen mode. Tap any cell for channel number and value
 - **Stats & Log** — six metric cards (PPS In/Out, Universes, Errors, Seq Errors in red, Uptime). Per-interface and per-universe stats tables with sequence error highlighting. Reset Stats button. Event log with level filter (All / Warn+ / Errors)
@@ -627,7 +628,7 @@ The web interface is a responsive single-page application embedded in the binary
 
 - **Bidirectional sync** — changes from desktop push to web via WebSocket in real time, and vice versa
 - **Optional PIN authentication** — protects HTTP and WebSocket access. Saved in the browser for convenience
-- **WebSocket channels** — subscribe to playback, stats, RDM, engines, log, and interface events
+- **WebSocket channels** — subscribe to playback, stats, RDM, engines, log, interfaces, llrp, monitor, and patch events
 - **Self-describing API** — `GET /api` returns a JSON index of all endpoints and channels
 - **CORS enabled** — accessible from any web browser or third-party tool
 - **PWA support** — add to home screen for a native app experience
@@ -669,6 +670,8 @@ Open **Network → Web API...** to configure: enable/disable, bind address (rest
 
 **Remote show control** — open the web interface on a phone or tablet to run cues, trigger blackout, and monitor playback from anywhere on the lighting network. Use Bitfocus Companion with the REST API to build a StreamDeck page for hands-free operation.
 
+**Walk-the-rig commissioning from a tablet** — open the Fixture Check panel on a tablet, walk the truss with the rig in your hand, and use Highlight + Prev / Next to step through every fixture without going back to the booth. Group headers per layer collapse to keep long lists manageable. The Check RDM dialog tells you which fixtures aren't responding before the focus call starts.
+
 ---
 
 ## Installation
@@ -678,8 +681,8 @@ Download and run `DMXRouter-Setup.exe`. All dependencies are included. UAC will 
 
 ### Linux
 Download the binary for your architecture from the [Releases](https://github.com/fiverecords/DMXRouter/releases) page:
-- `DMXRouter-v1.9.2-linux-x86_64.zip` — standard PCs and servers
-- `DMXRouter-v1.9.2-linux-arm64.zip` — Raspberry Pi 4/5, Orange Pi, and other ARM64 boards
+- `DMXRouter-v1.9.3-linux-x86_64.zip` — standard PCs and servers
+- `DMXRouter-v1.9.3-linux-arm64.zip` — Raspberry Pi 4/5, Orange Pi, and other ARM64 boards
 
 Qt6 runtime libraries are required:
 
@@ -751,4 +754,4 @@ This application uses **Qt 6**, licensed under the LGPL v3. Qt is dynamically li
 
 ---
 
-*DMXRouter v1.9.2 — Built for the stage.*
+*DMXRouter v1.9.3 — Built for the stage.*
