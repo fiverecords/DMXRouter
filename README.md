@@ -23,7 +23,7 @@ DMXRouter is a high-performance, cross-platform application written in C++ with 
 - **sACN per-channel priority** — full E1.31 0xDD support in merge and monitoring, with color-coded priority visualization
 - **Dockable panels** — all panels detach into floating windows for multi-monitor setups; drag, double-click, or use Alt+1–0
 - **Show cue system** — snapshot and sequence recording, crossfade with selectable curves, autopilot auto-advance, loop/ping-pong playback, DMX remote triggering, and per-show import/export
-- **RDM device management** — full E1.20 with device discovery, parameter control, sensor monitoring, self-test discovery and triggering, fixture templates with per-model DMX address assignment, operating hours tracking, Fixture ID (E1.37-5), manufacturer PID browser with per-device value caching, automatic status message drain, customizable device tree columns (including Serial and Rental ID from the Fixture Database), preset scene management (E1.37-1 PRESET_INFO / PRESET_STATUS / CAPTURE_PRESET with inline editing of fade times), large installation support (100+ fixtures), instant reconnect after brief disconnects (cached static info skips the full PID re-fetch sweep), optional quick-select mode that skips advanced PIDs for fast channel/personality changes, and "Set Address From Patch" right-click action that pushes a fixture's MVR address straight to the device via SET_DMX_START_ADDRESS
+- **RDM device management** — full E1.20 with device discovery, parameter control, sensor monitoring, self-test discovery and triggering, fixture templates with per-model DMX address assignment, operating hours tracking, Fixture ID (E1.37-5), manufacturer PID browser with per-device value caching, automatic status message drain, customizable device tree columns (including Serial and Rental ID from the Fixture Database), preset scene management (E1.37-1 PRESET_INFO / PRESET_STATUS / CAPTURE_PRESET with inline editing of fade times), large installation support (100+ fixtures), instant reconnect after brief disconnects (cached static info skips the full PID re-fetch sweep), optional quick-select mode that skips advanced PIDs for fast channel/personality changes, "Set Address From Patch" right-click action that pushes a fixture's MVR address straight to the device via SET_DMX_START_ADDRESS, and Thorough Discovery (multi-pass discovery with configurable settling time) for older Art-Net gateways and lossy switching where a single discovery sweep returns fewer fixtures than are actually patched
 - **RDM device emulator** — deep-capture a real fixture's complete RDM identity (every supported PID response stored verbatim), create virtual fixtures from scratch, or edit existing profiles — impersonate them on the network for pre-programming, controller testing, or equipment replacement. Save as reusable templates with full PID data preserved
 - **RDMNet / LLRP** — E1.33 broker connection, LLRP device discovery with network recovery (E1.37-2), and identify management
 - **Show Mode** — live-show protection lock that blocks destructive and caution-level operations across the desktop GUI, web interface, and REST API while keeping playback fully available
@@ -683,8 +683,8 @@ Download and run `DMXRouter-Setup.exe`. All dependencies are included. UAC will 
 
 ### Linux
 Download the binary for your architecture from the [Releases](https://github.com/fiverecords/DMXRouter/releases) page:
-- `DMXRouter-v1.9.4-linux-x86_64.zip` — standard PCs and servers
-- `DMXRouter-v1.9.4-linux-arm64.zip` — Raspberry Pi 4/5, Orange Pi, and other ARM64 boards
+- `DMXRouter-v1.9.5-linux-x86_64.zip` — standard PCs and servers
+- `DMXRouter-v1.9.5-linux-arm64.zip` — Raspberry Pi 4/5, Orange Pi, and other ARM64 boards
 
 Qt6 runtime libraries are required:
 
@@ -744,6 +744,10 @@ For high universe counts (100+), increase the UDP receive buffer:
 sudo sysctl -w net.inet.udp.recvspace=8388608
 ```
 
+### Virus scan
+
+The Windows installer for v1.9.5 has been scanned on VirusTotal — see the [scan report](https://www.virustotal.com/gui/file/86452775d5d16ce7d1b053b02cc9360a85dce2d734b0495536a778e7f0e73a27/detection). False positives from heuristic-based engines are common for unsigned independent software; the report shows what the major engines see. If your antivirus flags DMXRouter, you can verify the SHA-256 against the one on the report before trusting the binary.
+
 ---
 
 ## License
@@ -756,4 +760,4 @@ This application uses **Qt 6**, licensed under the LGPL v3. Qt is dynamically li
 
 ---
 
-*DMXRouter v1.9.4 — Built for the stage.*
+*DMXRouter v1.9.5 — Built for the stage.*
