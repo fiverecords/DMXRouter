@@ -560,6 +560,8 @@ The **📊 Monitor** tab provides a real-time view of all DMX data flowing throu
 
 ## PSN Viewer
 
+![PSN Viewer](docs/PSNViewer.png)
+
 The **🎯 PSN Viewer** dock receives and displays [PosiStageNet](https://posistage.net/) tracking-server traffic — the open multicast protocol used by Robert Juliat Spotme, BlackTrax, Zactrack, MA Lighting's Stage Marker streams, and other modern tracking systems. DMXRouter is purely a PSN client: it observes the multicast group passively and never emits, so plugging it onto a live tracking network is non-disruptive.
 
 - **Multi-server support** — PSN is multi-server by design (Spotme typically runs main + backup; MA installations may have multiple parallel tracking sources). Each sender IP gets its own colour from a stable palette. Servers are identified by sender IP rather than by system name, so two servers with the same advertised name still appear independently
