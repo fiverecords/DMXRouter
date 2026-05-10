@@ -786,7 +786,7 @@ sudo sysctl -w net.inet.udp.recvspace=8388608
 
 ### Virus scan
 
-The Windows installer for v1.9.5 has been scanned on VirusTotal — see the [scan report](https://www.virustotal.com/gui/file/86452775d5d16ce7d1b053b02cc9360a85dce2d734b0495536a778e7f0e73a27/detection). False positives from heuristic-based engines are common for unsigned independent software; the report shows what the major engines see. If your antivirus flags DMXRouter, you can verify the SHA-256 against the one on the report before trusting the binary.
+The Windows installer for v1.10.1 has been scanned on VirusTotal — see the [scan report](https://www.virustotal.com/gui/file/305d21497669fddc610b9830d844c9e0a4c688f040bc7b9e25ef6f41dd6fd013/detection). False positives from heuristic-based engines are common for unsigned independent software; the report shows what the major engines see. If your antivirus flags DMXRouter, you can verify the SHA-256 against the one on the report before trusting the binary.
 
 ---
 
