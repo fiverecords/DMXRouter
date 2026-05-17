@@ -33,7 +33,7 @@ DMXRouter is a high-performance, cross-platform application written in C++ with 
 - **Network discovery** — live Art-Net node and sACN source discovery with protocol-aware remote node configuration. Optional WiFi interface support for preprogramming scenarios without Ethernet. Passive MA-Net listener detects grandMA2 and grandMA3 stations on the wire (hostname, session name, IP, protocol) so an operator running a mixed rig can see at a glance which MA gear is alive, without needing a separate tool
 - **VLAN management** — cross-platform virtual adapter management for production network segmentation (Windows Hyper-V, Linux NetworkManager, macOS networksetup). Industry-standard group presets with colour-coded dropdown, plus a Custom entry for any VLAN ID (1–4094). No need to run as root — each platform prompts for the admin password only when needed. VLANs and IPs persist across reboots on all three platforms.
 - **Real-time statistics** — per-interface and per-universe throughput metrics with live event log and pop-out log window
-- **Universe monitor** — real-time DMX data and sACN priority viewer with per-interface filtering for multi-NIC environments
+- **Universe monitor** — real-time DMX data and sACN priority viewer with per-interface filtering for multi-NIC environments, plus a per-cell channel-label band that abbreviates the GDTF or MA2 attribute name above each value (Pan, Dim, R/G/B, Zoom, Iris, Strobe, Focus, …) so the operator can identify what each channel does without leaving the monitor
 - **PSN viewer** — passive PosiStageNet receiver and visualiser for tracking-server traffic (Spotme, BlackTrax, Zactrack, MA Stage Marker streams, etc.). Multi-server support, sortable table with server-coloured swatches, interactive 2D top-down map with mouse-wheel zoom, drag-pan, and Fit View. Click a row to highlight the corresponding tracker on the map. Fixture-to-tracker binding ties patched fixtures to PSN trackers so the viewer can show which lights are aimed at which moving target — a Followers column counts the fixtures bound to each tracker, a Selected tracker detail panel surfaces the v2.03 fields (acceleration, target position, per-tracker timestamp, server compute lag) and the bound fixture list, and the map draws connecting lines from each follower fixture's stage position to its tracker dot. Receive-only — DMXRouter never emits PSN, so it's safe to drop onto a live tracking network as a passive observer
 - **Manual test patterns** — per-engine "Test…" button (toolbar + right-click) opens a non-modal dialog that injects Full / Blackout / Ramp (Up or Down direction, Synchronous or Rolling style) / Chase (with optional Hold-until-loop fill) / Sinewave (Synchronous or Rolling) / Single Channel patterns onto an engine's outputs while troubleshooting. Bypasses channel patch and fixture overrides — what hits the wire is exactly the pattern. Works on silent engines too (data loss / Stop failsafe / never-received-input — DMXRouter feeds the pattern at ~30 Hz on its own). Live pattern switching with phase-preserving speed control (drag the slider while a pattern runs and the wave's current position holds steady while its forward speed shifts), continuous speed range from 100 ms strobe-fast to 30 s slow walk, configurable Chase group size (1–16, set to 3 for RGB pixel strips, 4 for RGBW) and rolling-wave wavelength (3–512 channels, shared by rolling Ramp and rolling Sinewave), selectable duration with a 5-minute hard ceiling, multi-engine simultaneous testing, live "TEST 23s" countdown badge in the engine row, auto-stop on dialog close / engine edit / profile load. Inspired by sACNView's Transmit Window and ChamSys MagicQ's per-universe Test button
 - **Bulk Snapshot dialog** — toolbar "Snapshot…" button + right-click entry opens a dialog that captures startup buffers and records failsafe scenes across many selected engines in one sweep instead of one editor session per engine. Capture pulls each checked engine's live merged output into its own startup buffer or failsafe scene; Import broadcasts a single .dmx/.bin file to every checked engine. Live annotations on each row show what's already stored ("startup ✓", "failsafe ✓") before and after each operation, so silent skips (e.g. an engine that hasn't produced output yet) are visible at a glance. Each operation is its own undo step. Show Mode "Destructive" gated
@@ -44,8 +44,9 @@ DMXRouter is a high-performance, cross-platform application written in C++ with 
 - **Update checker** — automatic new version detection via GitHub Releases, with persistent status bar button and per-version dismiss
 - **Web remote control** — built-in HTTP + WebSocket server with a responsive web interface. Full engine management (create, edit, delete, enable/disable, switch inputs, Output Processing block with Master/Limit, Startup Buffer and Failsafe controls), Fixture Check panel for live commissioning from a tablet (semantic sliders, Highlight, walk-the-rig with Auto-Next stepping that stays in sync between desktop and tablet, sort by Address/FID/Name, RDM cross-reference, "Set Address From Patch" on every RDM device row), RDM device configuration and template management (edit, delete, plus global Auto-apply / Apply DMX address / Alert identify toggles), LLRP discovery and network recovery (E1.37-2), VLAN management, IP editor, universe monitor with live DMX grid, per-universe stats, show control, and profile management from any phone, tablet, or browser on the network. Optional PIN authentication, PWA support (add to home screen), keyboard shortcuts, zero external dependencies
 - **Fixture Check** — commissioning dock for walking through an imported rig fixture-by-fixture. Import `.mvr` files from MA3, Capture, Vectorworks, WYSIWYG and others; match placeholders to real GDTF profiles via built-in gdtf-share.com client; control fixtures with semantic sliders (Pan/Tilt/Color/Gobo/…), Home/Highlight/Release, multi-fixture broadcast, named channel ranges with wheel thumbnails, multi-cell LED wall support. Walk-the-rig with multi-selection, Auto-Next stepping on a configurable timer, and Prev / Next that follow the patch tree's column sort (FID, Address, Name, Mode). Click any column header to sort within layer groups. Integrates with RDM: right-click any discovered device to inject it into the patch even without an MVR. Per-instance Change Mode (right-click any patch tree row to switch one or more fixtures to a different mode of their assigned GDTF without re-running the resolver) and DMX address overlap highlighting (red tint with tooltip listing the offending neighbours, same convention as the RDM device tree) catch the two most common patch-time errors. PSN tracker binding (right-click "Follow PSN Tracker…") ties patched fixtures to live PSN trackers — a dedicated PSN column in the tree shows the bound tracker ID per fixture, and the PSN viewer reflects the relationship in its Followers column, detail panel, and connecting lines on the map
+- **MVR-xchange network** — discover other MVR-xchange capable applications on the LAN (grandMA3, Vectorworks Spotlight, BlenderDMX, Production Assist, Zactrack) and pull their currently-loaded MVR directly into the patch without a USB stick; advertise the loaded MVR back so a downstream peer can chain (Vectorworks → DMXRouter → another DMXRouter or visualiser). Single-page dialog with one **Activate MVR-Exchange** toggle for both discovery and sharing, **Interface** selector for choosing which NIC to advertise on (defaults to all NICs including loopback so a peer on the same workstation works out of the box), identity (Station name, Group, persistent Station UUID) editable per-machine, real-time **transaction log** showing every protocol event, automatic `MVR_COMMIT` push to connected peers when the loaded MVR changes, automatic service stop after a successful receive so DMXRouter doesn't keep advertising in the background after the operator has moved on to import
 - **Cross-platform** — identical look and feel on Windows, Linux (x86-64 and ARM64), and macOS from a single codebase
-- **~125,000 lines of production C++20** — zero compiler warnings with strict flags (`-Wall -Wextra -Wpedantic` / `/W4`)
+- **~129,000 lines of production C++20** — zero compiler warnings with strict flags (`-Wall -Wextra -Wpedantic` / `/W4`)
 
 ---
 
@@ -59,6 +60,7 @@ DMXRouter is a high-performance, cross-platform application written in C++ with 
 - [RDM & RDMNet](#rdm--rdmnet)
 - [RDM Device Emulator](#rdm-device-emulator)
 - [Fixture Check](#fixture-check)
+- [MVR-xchange Network](#mvr-xchange-network)
 - [Channel Patching](#channel-patching)
 - [Channel History](#channel-history)
 - [Network Discovery](#network-discovery)
@@ -463,6 +465,74 @@ The control flow is layered so Fixture Check never duplicates transport logic �
 
 ---
 
+## MVR-xchange Network
+
+DMXRouter implements the open **MVR-xchange** protocol jointly developed by MA Lighting and the wider lighting industry. The same standard grandMA3, Vectorworks Spotlight, BlenderDMX, Production Assist, Zactrack and a growing number of other applications already speak — so an MVR file produced in one tool can travel directly to the next over the local network, no USB stick or cloud share required.
+
+The protocol surfaces in DMXRouter through a single-page dialog opened from the patch panel's Add ▾ menu (entry: **MVR-xchange…**). A toggle button at the top — **Activate MVR-Exchange** — switches discovery and sharing on together; the rest of the dialog is the operator's view of who's on the network and what's being exchanged.
+
+### Activating the service
+
+Clicking Activate does several things at once:
+
+- Joins the mDNS multicast group as `<station-name>.<group>._mvrxchange._tcp.local.` with the full PTR + SRV + TXT + A record set, broadcasting on every NIC the **Interface** selector includes
+- Opens a TCP listener on an OS-assigned high port — the SRV record carries that port so peers know where to connect
+- Starts browsing the network for other MVR-xchange capable stations and keeps the responder pinging every five seconds so lazy responders (notably grandMA3, whose first reply can take a few seconds after the feature is enabled on the desk) get repeated chances to answer
+- Whatever MVR is currently in the local store (file picker, Receive-from-Network, doesn't matter how it got loaded) becomes the host's current commit, available for download by any peer that joins
+
+### Interface selection
+
+A dropdown labelled **Interface** picks which NICs DMXRouter advertises on:
+
+- **All interfaces (auto)** (default) — every up-and-running IPv4 NIC including loopback. Best choice for the common case where DMXRouter and a peer application live on the same workstation (e.g. grandMA3 onPC and DMXRouter on the same laptop) because the same announce goes out on loopback with `A=127.0.0.1` and on the show LAN with the LAN IP, so a peer on either side gets a usable address
+- **Loopback (127.0.0.1)** — only the local loopback interface, useful for tight same-host setups where the operator wants to keep MVR-xchange chatter off the public LAN
+- Every detected IPv4 NIC by name and address — restrict traffic to a specific show network
+
+The choice is persistent: DMXRouter remembers the last selection across restarts and re-applies it the next time the service is activated.
+
+### Receiving an MVR
+
+Every discovered station shows up as a top-level row in the tree the moment it answers — station name, IP, application provider (grandMA3, Vectorworks, BlenderDMX, …) — and a parallel TCP connection runs in the background to fetch the station's commit list, which populates as child rows under the station with file name, size and the publisher's free-form comment. Pick a commit, click **Download & Import** and DMXRouter requests the binary, hands the bytes straight to the same MVR import pipeline the file picker uses (Replace / Merge prompt when a patch is already loaded, GDTF resolver run on the resulting patch, the works).
+
+Once a file has been pulled successfully, MVR-xchange stops itself automatically — the dialog closes into the import flow and the operator is heading into patch edits, not waiting for more network chatter. Re-opening the dialog and clicking Activate again re-arms the service.
+
+### Sharing the loaded MVR
+
+While the service is active, the loaded MVR is automatically advertised to peers. Editable identity persists across DMXRouter restarts via QSettings:
+
+- **Station name** — defaults to `DMXRouter on <hostname>`; this is the name peers see in their discovery list
+- **Group** — defaults to `Default`, matching what every other MVR-xchange capable application uses (grandMA3 in particular is case-sensitive on the group name); stations on different group names don't see each other
+- **Station UUID** — read-only, generated on first run, survives every restart so a peer that knew DMXRouter yesterday recognises the same DMXRouter today (preserves their dedup logic against the per-commit FileUUIDs)
+
+Identity edits are accepted only while the service is stopped so a rename mid-show doesn't briefly black out joined peers — stop, edit, start again is the supported pattern.
+
+Importing a fresh MVR while the service is active triggers an `MVR_COMMIT` push to every currently visible peer — they receive a message describing the new commit (FileUUID, file name, size, comment) and their UI updates to show the new entry so operators on those peers can pick it and pull it down. Clearing the patch propagates as a "no current commit" signal too. The host serves the same bytes the operator loaded byte-for-byte — DMXRouter does not regenerate or re-export the MVR on patch edits (manual fixture additions, address changes, mode changes), so the file every peer sees is exactly the one that came in from upstream with no quality loss in a Vectorworks → DMXRouter → BlenderDMX-or-second-DMXRouter chain.
+
+### Transaction log
+
+The bottom of the dialog hosts a scrolling **transaction log** that prints every protocol event in real time:
+
+```
+IN  MVR_JOIN from Proart-gMA3 (GrandMA3)
+OUT MVR_JOIN_RET to Proart-gMA3 ok=true commits=0
+OUT MVR_COMMIT to Proart-gMA3 @ 192.168.1.50:42424 (post-JOIN cold push) file=ACTX V11 + IDS v2026.mvr
+    ✓ Proart-gMA3 acknowledged (post-JOIN)
+IN  MVR_REQUEST from Proart-gMA3 file=ACTX V11 + IDS v2026.mvr
+OUT MVR file sent to Proart-gMA3 (41246814 bytes)
+```
+
+Useful for confirming a handshake went through without reaching for Wireshark, and (where it doesn't) for seeing exactly which step failed.
+
+### Opt-in per session
+
+The enabled state of the service is **not** persistent. Identity stays remembered, but the operator clicks Activate each time — matching the explicit-toggle pattern grandMA3 and Vectorworks use. Avoids surprising an operator who didn't realise the application would be advertising on a network they may not be ready to publish to.
+
+Stopping the service sends a goodbye announcement with TTL=0 so well-behaved peers prune DMXRouter from their list immediately rather than waiting for the records to age out.
+
+The mDNS/DNS-SD discovery is built on [mdns](https://github.com/mjansson/mdns) by Mattias Jansson, placed in the public domain.
+
+---
+
 ## Channel Patching
 
 Full channel-level remapping applied after merge and before output.
@@ -585,6 +655,7 @@ The **📊 Monitor** tab provides a real-time view of all DMX data flowing throu
 - **DMX / Priority view toggle** — switch between standard DMX levels (0–255) and sACN per-channel priority data (0xDD start code). Priority view uses a dedicated color palette: blue (low) → green (default 100) → orange/red (high/max 200). Hover shows the exact priority value and level label
 - **Priority indicators** — universe list entries carrying 0xDD data show a `[P]` tag; when multiple sources disagree on priority, both values are shown (e.g., `pri:100/150`)
 - **Grid view** — 32×16 channel grid with colour-coded values and amber selection highlight
+- **Per-cell channel labels** — when a patch is loaded, each cell carries a small label band above the value reading showing an abbreviated form of the GDTF or MA2 channel name (Pan, Tilt, Dim, R, G, B, W, Zoom, Iris, Strobe, Focus, Gobo, Color, CTC, …) so the operator can identify what each channel does without leaving the monitor for the Fixture Check panel. 16-bit and 24-bit fine channels are suffixed `.f` / `.u` so the operator can tell coarse from fine at a glance. Channels with no patch coverage fall back to best-effort truncation of the original name. The full GDTF / MA2 attribute lexicon — roughly 220 entries covering both standards' common naming variants — is normalised before display so MA2's "PAN" and GDTF's "Pan" render identically. Priority view suppresses the band (those bytes are priority values, not fixture data)
 - **Absolute universe display** — Art-Net universes show `0.1.0 (17)` with 1-based absolute numbering
 - **Active channel count** — shows how many channels are above zero
 - **Channel history** — click any channel to open the oscilloscope waveform view
@@ -757,8 +828,8 @@ Download and run `DMXRouter-Setup.exe`. All dependencies are included. Requires 
 
 ### Linux
 Download the binary for your architecture from the [Releases](https://github.com/fiverecords/DMXRouter/releases) page:
-- `DMXRouter-v1.11.0-linux-x86_64.zip` — standard PCs and servers
-- `DMXRouter-v1.11.0-linux-arm64.zip` — Raspberry Pi 4/5, Orange Pi, and other ARM64 boards
+- `DMXRouter-v1.11.1-linux-x86_64.zip` — standard PCs and servers
+- `DMXRouter-v1.11.1-linux-arm64.zip` — Raspberry Pi 4/5, Orange Pi, and other ARM64 boards
 
 Qt6 runtime libraries are required, plus the ALSA runtime library (`libasound2` / `alsa-lib`) which the new v1.11 MIDI bridge links against directly. Desktop distros ship libasound2 preinstalled with the audio stack — this only matters for minimal / server / container images where audio isn't already present. Without libasound2 the app fails to start with `error while loading shared libraries: libasound.so.2`; install the package below and the app launches normally.
 
@@ -832,8 +903,8 @@ This software is proprietary. See the [LICENSE](LICENSE) file for full terms.
 
 This application uses **Qt 6**, licensed under the LGPL v3. Qt is dynamically linked and unmodified. See the [NOTICE](NOTICE) file for third-party attributions and your rights under the LGPL.
 
-The full text of every third-party licence used by DMXRouter (Qt LGPL v3, zlib, libremidi) is embedded in the binary and available offline via **Help → About → "View Full Licenses"** — no external file or internet lookup is required, so the licences are readable even on air-gapped show networks.
+The full text of every third-party licence used by DMXRouter (Qt LGPL v3, zlib, libremidi, mdns) is embedded in the binary and available offline via **Help → About → "View Full Licenses"** — no external file or internet lookup is required, so the licences are readable even on air-gapped show networks.
 
 ---
 
-*DMXRouter v1.11.0 — Built for the stage.*
+*DMXRouter v1.11.1 — Built for the stage.*
