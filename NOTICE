@@ -1,83 +1,78 @@
-DMXROUTER — THIRD-PARTY NOTICES
-================================
+DMXRouter
+=========
 
-This product includes software developed by third parties. Their licenses and
-attribution notices are listed below.
+Copyright (c) Joaquín Villodre / Fiverecords. All rights reserved.
 
+DMXRouter is proprietary software. See the LICENSE file for distribution
+terms.
 
-──────────────────────────────────────────────────────────────────────────────
-Qt Framework
-──────────────────────────────────────────────────────────────────────────────
-
-Copyright (C) The Qt Company Ltd.
-https://www.qt.io
-
-This application uses Qt 6, which is licensed under the
-GNU Lesser General Public License v3 (LGPL v3).
-
-Qt is dynamically linked and has not been modified. In accordance with the
-LGPL v3, users are entitled to obtain the Qt source code from:
-
-    https://code.qt.io
-
-and to re-link this application against a modified version of the Qt libraries.
-
-Full text of the LGPL v3: https://www.gnu.org/licenses/lgpl-3.0.html
-Full text of the GPL v3:  https://www.gnu.org/licenses/gpl-3.0.html
+This binary is statically or dynamically linked against the open-source
+components listed below. Every full license text is also embedded in the
+application binary and viewable offline via Help -> About -> "View Full
+Licenses".
 
 
-──────────────────────────────────────────────────────────────────────────────
-Art-Net™
-──────────────────────────────────────────────────────────────────────────────
+--------------------------------------------------------------------------
+Qt 6
+--------------------------------------------------------------------------
 
-Art-Net™ is designed by and is Copyright Artistic Licence Holdings Ltd.
-https://art-net.org.uk
+DMXRouter uses the Qt 6 framework for its GUI, networking, and
+cross-platform abstractions.
 
-This software implements the Art-Net 4 protocol specification. The Art-Net
-protocol is used under the terms set out in the Art-Net specification document.
-Art-Net is a trademark of Artistic Licence Holdings Ltd.
+  Website:  https://www.qt.io
+  Source:   https://code.qt.io/cgit/qt/qt5.git/ (the Qt project history)
+  License:  GNU Lesser General Public License v3 (LGPLv3)
 
-
-──────────────────────────────────────────────────────────────────────────────
-ANSI E1.31 — sACN (Streaming ACN)
-──────────────────────────────────────────────────────────────────────────────
-
-ANSI E1.31-2018 — Entertainment Technology: Lightweight Streaming Protocol for
-Transport of DMX512 Using ACN.
-
-Published by ESTA (Entertainment Services and Technology Association).
-https://www.esta.org
+Qt is dynamically linked and unmodified. Per the LGPLv3 you have the
+right to replace the Qt runtime libraries shipped alongside DMXRouter
+with your own build of the same Qt version, and DMXRouter must continue
+to function with the replacement.
 
 
-──────────────────────────────────────────────────────────────────────────────
-ANSI E1.20 — RDM (Remote Device Management)
-──────────────────────────────────────────────────────────────────────────────
+--------------------------------------------------------------------------
+zlib
+--------------------------------------------------------------------------
 
-ANSI E1.20-2010 — Entertainment Technology: Remote Device Management over
-DMX512 Networks.
+DMXRouter uses zlib by Jean-loup Gailly and Mark Adler for MVR and GDTF
+archive (.zip) extraction.
 
-Published by ESTA (Entertainment Services and Technology Association).
-https://www.esta.org
+  Website:  https://zlib.net
+  License:  zlib license (BSD-style permissive)
 
-
-──────────────────────────────────────────────────────────────────────────────
-ANSI E1.33 — RDMNet / LLRP
-──────────────────────────────────────────────────────────────────────────────
-
-ANSI E1.33 — Entertainment Technology: Message Transport Infrastructure for
-ANSI E1.20 (RDMNet) and Low-Level Recovery Protocol (LLRP).
-
-Published by ESTA (Entertainment Services and Technology Association).
-https://www.esta.org
+zlib is statically linked into the DMXRouter binary.
 
 
-──────────────────────────────────────────────────────────────────────────────
-DMX512
-──────────────────────────────────────────────────────────────────────────────
+--------------------------------------------------------------------------
+libremidi
+--------------------------------------------------------------------------
 
-ANSI E1.11-2008 — Entertainment Technology: USITT DMX512-A, Asynchronous
-Serial Digital Data Transmission Standard for Controlling Lighting Equipment
-and Accessories.
+DMXRouter uses libremidi by Jean-Michael Celerier and contributors for
+MIDI input and output via the host operating system's native MIDI
+subsystem (Windows MM on Windows, CoreMIDI on macOS, ALSA on Linux).
 
-Published by ESTA (Entertainment Services and Technology Association).
-https://www.esta.org
+  Repository:  https://github.com/celtera/libremidi
+  License:     Boost Software License 1.0
+
+libremidi is header-only and compiled directly into the DMXRouter binary.
+
+
+--------------------------------------------------------------------------
+mdns
+--------------------------------------------------------------------------
+
+DMXRouter uses the mdns library by Mattias Jansson for mDNS/DNS-SD
+service discovery (RFC 6762 / RFC 6763), used by the MVR-xchange module
+to discover other MVR-xchange capable applications on the local network.
+
+  Repository:  https://github.com/mjansson/mdns
+  License:     Public domain (no attribution required, but appreciated)
+
+mdns is a single-header library compiled directly into the DMXRouter
+binary.
+
+
+--------------------------------------------------------------------------
+
+The full text of each license above is included verbatim in the
+DMXRouter binary at resources/licenses/ and surfaced through
+Help -> About -> "View Full Licenses".

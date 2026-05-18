@@ -1,44 +1,69 @@
-DMXROUTER PROPRIETARY SOFTWARE LICENSE
+DMXRouter — Software License
+============================
 
-Copyright (c) 2026. All rights reserved.
+Copyright (c) 2026 Joaquín Villodre / Fiverecords. All rights reserved.
 
-This software and associated documentation files (the "Software") are proprietary
-and confidential. No part of this Software may be reproduced, distributed,
-modified, or transmitted in any form or by any means — electronic, mechanical,
-photocopying, recording, or otherwise — without the prior written permission of
-the copyright holder.
+DMXRouter is proprietary software made available free of charge by
+Joaquín Villodre / Fiverecords.
 
-RESTRICTIONS
+Permitted uses
+--------------
 
-1. You may not copy, modify, merge, publish, distribute, sublicense, or sell
-   copies of the Software or any derivative works thereof.
+  - Installing and running DMXRouter on any number of machines, for
+    personal or commercial purposes.
+  - Redistributing the official installer and the binaries it produces,
+    in unmodified form, obtained from Joaquín Villodre / Fiverecords or from any party
+    who received them on these same terms.
 
-2. You may not reverse-engineer, decompile, or disassemble the Software, except
-   to the extent that such activity is expressly permitted by applicable law.
+Restrictions
+------------
 
-3. You may not remove or alter any proprietary notices, labels, or marks on the
-   Software.
+The following are not permitted without prior written permission from
+Joaquín Villodre / Fiverecords:
 
-DISCLAIMER OF WARRANTIES
+  - Modifying, reverse-engineering, decompiling, or disassembling the
+    DMXRouter binaries, in whole or in part.
+  - Distributing modified versions of DMXRouter, including patches,
+    forks, or customised builds, under the DMXRouter name or any name
+    likely to be confused with it.
+  - Removing or altering the copyright notices, third-party
+    attributions, or this license file from any distribution of
+    DMXRouter.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER
-IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF, OR IN
-CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+Third-party components
+----------------------
 
-THIRD-PARTY COMPONENTS
+DMXRouter incorporates open-source software components under their own
+licenses (Qt 6 under LGPL v3, zlib under the zlib license, libremidi
+under the Boost Software License 1.0, and mdns in the public domain).
+Those components retain their original licenses; this license governs
+only the proprietary DMXRouter code, configuration data, and resources
+authored by Joaquín Villodre / Fiverecords.
 
-This Software uses Qt (https://www.qt.io), which is licensed under the
-GNU Lesser General Public License v3 (LGPL v3). The Qt libraries are dynamically
-linked and are not modified. In accordance with the LGPL v3, users who receive a
-binary distribution of this Software are entitled to:
+The full text of every third-party license used by DMXRouter is
+included in the NOTICE file and is also embedded in the application
+binary, viewable via Help -> About -> "View Full Licenses".
 
-  - Obtain the corresponding Qt source code from https://code.qt.io
-  - Re-link this application against a modified version of the Qt libraries
+Disclaimer of warranty
+----------------------
 
-A full copy of the LGPL v3 license is available in the NOTICE file and at:
-https://www.gnu.org/licenses/lgpl-3.0.html
+DMXRouter is provided "as is", without warranty of any kind, express
+or implied, including but not limited to the warranties of
+merchantability, fitness for a particular purpose, and non-infringement.
+The entire risk arising out of the use or performance of the software
+remains with the user.
 
-Additional third-party attributions are listed in the NOTICE file.
+Limitation of liability
+-----------------------
+
+In no event shall Joaquín Villodre / Fiverecords or the copyright holder be liable for
+any claim, damages, or other liability, whether in an action of
+contract, tort, or otherwise, arising from, out of, or in connection
+with the software or the use or other dealings in the software.
+
+Contact
+-------
+
+For licensing enquiries that fall outside the permitted uses above —
+custom builds, distribution partnerships, source code licensing —
+contact Joaquín Villodre / Fiverecords through the channels listed in README.md.
