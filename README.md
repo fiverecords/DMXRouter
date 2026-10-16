@@ -1,4 +1,16 @@
-# DMXRouter
+# DMXRouter — Notice of Transition
+
+**Public downloads are no longer available.**
+
+First of all, a huge thank you to everyone in the live entertainment and lighting community who tested, used, and provided feedback on **DMXRouter** during its public development phase. 
+
+The project is now transitioning into a new commercial stage to bring a fully supported, industrial-grade solution to the market. As part of this transition, public builds and free downloads have been permanently withdrawn.
+
+* **Future Updates:** More news regarding the official commercial release will be shared in due course.
+
+Thank you for your support!  
+— *Joaquín Villodre (fiverecords)*
+
 
 [![Latest Release](https://img.shields.io/github/v/release/fiverecords/DMXRouter?style=flat-square&color=blue)](https://github.com/fiverecords/DMXRouter/releases/latest)
 [![Downloads (latest release)](https://img.shields.io/github/downloads/fiverecords/DMXRouter/latest/total?label=Downloads%20%28latest%20release%29&color=blue&style=flat-square)](https://github.com/fiverecords/DMXRouter/releases/latest)
